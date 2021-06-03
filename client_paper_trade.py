@@ -29,8 +29,8 @@ class ClientPaperTrade:
             yaml.dump(assets, f, indent=2)
 
     def load_assets(self) -> dict:
-        with open(f"{self.store_path}/assets.json", 'r') as f:
-            assets = json.load(f)
+        with open(f"{self.store_path}/assets.yaml", 'r') as f:
+            assets = yaml.safe_load(f)
         return assets
 
 
@@ -41,11 +41,11 @@ def main():
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    # assets = client.load_assets()
-    # active_assets = list(filter(lambda a: a['status'] == 'active', assets))
-    # symbols = list(map(lambda a: a['symbol'], active_assets))
-    # print(symbols)
-    client.store_assets()
+    assets = client.load_assets()
+    active_assets = list(filter(lambda a: a['status'] == 'active', assets))
+    symbols = list(map(lambda a: a['symbol'], active_assets))
+    print(symbols)
+    # client.store_assets()
 
 
 if __name__ == '__main__':
