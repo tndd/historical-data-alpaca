@@ -69,6 +69,10 @@ class ClientPaperTrade:
             symbol_dl_progress = yaml.safe_load(f)
         return symbol_dl_progress
 
+    def load_symbols_progress_todo(self) -> list:
+        sdp = self.load_symbol_dl_progress()
+        return [s for s, d in sdp.items() if d['f'] is False]
+
 
 def main():
     load_dotenv()
@@ -77,8 +81,8 @@ def main():
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    symbol_dl_progress = client.load_symbol_dl_progress()
-    print(symbol_dl_progress)
+    symbols = client.load_symbols_progress_todo()
+    print(symbols)
 
 
 if __name__ == '__main__':
