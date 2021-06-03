@@ -18,6 +18,7 @@ class ClientPaperTrade:
     def __post_init__(self) -> None:
         self.assets_path = f"{self.store_path}/{self.assets_file_name}"
         self.symbol_dl_progress_path = f"{self.store_path}/{self.symbol_dl_progress_file_name}"
+        self.symbol_dl_progress = self.load_symbol_dl_progress()
 
     def get_auth_headers(self) -> dict:
         return {
@@ -69,9 +70,8 @@ class ClientPaperTrade:
             symbol_dl_progress = yaml.safe_load(f)
         return symbol_dl_progress
 
-    def load_symbols_progress_todo(self) -> list:
-        sdp = self.load_symbol_dl_progress()
-        return [s for s, d in sdp.items() if d['f'] is False]
+    def symbols_progress_todo(self) -> list:
+        return [s for s, d in self.symbol_dl_progress.items() if d['f'] is False]
 
 
 def main():
@@ -81,7 +81,7 @@ def main():
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    symbols = client.load_symbols_progress_todo()
+    symbols = client.symbols_progress_todo()
     print(symbols)
 
 
