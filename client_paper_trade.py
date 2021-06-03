@@ -11,6 +11,10 @@ class ClientPaperTrade:
     secret_key: str
     base_url: str
     store_path = './data'
+    assets_file_name = 'assets.yaml'
+
+    def __post_init__(self) -> None:
+        self.assets_path = f"{self.store_path}/{self.assets_file_name}"
 
     def get_auth_headers(self) -> dict:
         return {
@@ -25,11 +29,14 @@ class ClientPaperTrade:
 
     def store_assets(self) -> None:
         assets = self.get_assets()
-        with open(f"{self.store_path}/assets.yaml", 'w') as f:
+        with open(self.assets_path, 'w') as f:
             yaml.dump(assets, f, indent=2)
 
     def load_assets(self) -> dict:
-        with open(f"{self.store_path}/assets.yaml", 'r') as f:
+        # if not exist assets data
+        if not os.path.exists(self.assets_path):
+            self.store_assets()
+        with open(self.assets_path, 'r') as f:
             assets = yaml.safe_load(f)
         return assets
 
