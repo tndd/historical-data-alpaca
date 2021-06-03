@@ -1,5 +1,5 @@
 import requests
-import json
+import yaml
 import os
 from dotenv import load_dotenv
 from dataclasses import dataclass
@@ -25,8 +25,8 @@ class ClientPaperTrade:
 
     def store_assets(self) -> None:
         assets = self.get_assets()
-        with open(f"{self.store_path}/assets.json", 'w') as f:
-            json.dump(assets, f, indent=2)
+        with open(f"{self.store_path}/assets.yaml", 'w') as f:
+            yaml.dump(assets, f, indent=2)
 
     def load_assets(self) -> dict:
         with open(f"{self.store_path}/assets.json", 'r') as f:
