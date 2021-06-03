@@ -1,6 +1,7 @@
 import requests
 import yaml
 import os
+import datetime
 from dotenv import load_dotenv
 from dataclasses import dataclass
 
@@ -49,8 +50,15 @@ class ClientPaperTrade:
 
     def create_symbol_dl_progress(self) -> None:
         symbols = self.get_active_symbols()
-        flags = [False for _ in range(len(symbols))]
-        symbol_dl_progress = dict(zip(symbols, flags))
+        time_now = datetime.datetime.now()
+        symbol_dl_progress = dict()
+        for s in symbols:
+            detail = {
+                'f': False,
+                't': time_now.isoformat(),
+                'm': ''
+            }
+            symbol_dl_progress[s] = detail
         with open(self.symbol_dl_progress_path, 'w') as f:
             yaml.dump(symbol_dl_progress, f, indent=2)
 
