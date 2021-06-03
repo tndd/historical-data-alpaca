@@ -40,6 +40,11 @@ class ClientPaperTrade:
             assets = yaml.safe_load(f)
         return assets
 
+    def get_active_symbols(self) -> list:
+        assets = self.load_assets()
+        active_assets = list(filter(lambda a: a['status'] == 'active', assets))
+        return list(map(lambda a: a['symbol'], active_assets))
+
 
 def main():
     load_dotenv()
@@ -48,9 +53,7 @@ def main():
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    assets = client.load_assets()
-    active_assets = list(filter(lambda a: a['status'] == 'active', assets))
-    symbols = list(map(lambda a: a['symbol'], active_assets))
+    symbols = client.get_active_symbols()
     print(symbols)
     # client.store_assets()
 
