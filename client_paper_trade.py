@@ -12,9 +12,11 @@ class ClientPaperTrade:
     base_url: str
     store_path = './data'
     assets_file_name = 'assets.yaml'
+    symbol_dl_progress_file_name = 'symbol_dl_progress.yaml'
 
     def __post_init__(self) -> None:
         self.assets_path = f"{self.store_path}/{self.assets_file_name}"
+        self.symbol_dl_progress_path = f"{self.store_path}/{self.symbol_dl_progress_file_name}"
 
     def get_auth_headers(self) -> dict:
         return {
@@ -45,6 +47,13 @@ class ClientPaperTrade:
         active_assets = list(filter(lambda a: a['status'] == 'active', assets))
         return list(map(lambda a: a['symbol'], active_assets))
 
+    def create_symbol_dl_progress(self) -> None:
+        symbols = self.get_active_symbols()
+        flags = [False for _ in range(len(symbols))]
+        symbol_dl_progress = dict(zip(symbols, flags))
+        with open(self.symbol_dl_progress_path, 'w') as f:
+            yaml.dump(symbol_dl_progress, f, indent=2)
+
 
 def main():
     load_dotenv()
@@ -53,9 +62,7 @@ def main():
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    symbols = client.get_active_symbols()
-    print(symbols)
-    # client.store_assets()
+    client.create_symbol_dl_progress()
 
 
 if __name__ == '__main__':
