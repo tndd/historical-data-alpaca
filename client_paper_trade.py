@@ -28,12 +28,25 @@ class ClientPaperTrade:
         with open(f"{self.store_path}/assets.json", 'w') as f:
             json.dump(assets, f, indent=2)
 
+    def load_assets(self) -> dict:
+        with open(f"{self.store_path}/assets.json", 'r') as f:
+            assets = json.load(f)
+        return assets
 
-if __name__ == '__main__':
+
+def main():
     load_dotenv()
     client = ClientPaperTrade(
         api_key=os.getenv('ALPACA_API_KEY'),
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
+    # assets = client.load_assets()
+    # active_assets = list(filter(lambda a: a['status'] == 'active', assets))
+    # symbols = list(map(lambda a: a['symbol'], active_assets))
+    # print(symbols)
     client.store_assets()
+
+
+if __name__ == '__main__':
+    main()
