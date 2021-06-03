@@ -4,6 +4,10 @@ import os
 import datetime
 from dotenv import load_dotenv
 from dataclasses import dataclass
+from logging import getLogger
+
+
+logger = getLogger(__name__)
 
 
 @dataclass
@@ -77,6 +81,19 @@ class ClientPaperTrade:
         with open(self.symbol_dl_progress_path, 'w') as f:
             yaml.dump(self.symbol_dl_progress, f, indent=2)
 
+    def update_dl_progress_of_symbol(
+            self,
+            symbol: str,
+            is_complete: bool,
+            message: str = '') -> None:
+        if symbol in self.symbol_dl_progress:
+            self.symbol_dl_progress[symbol]['t'] = datetime.datetime.now()
+            self.symbol_dl_progress[symbol]['f'] = is_complete
+            self.symbol_dl_progress[symbol]['m'] = message
+            self.update_symbol_dl_progress()
+        else:
+            logger.error(f"symbol \"{symbol}\" is not exist.")
+
 
 def main():
     load_dotenv()
@@ -85,8 +102,7 @@ def main():
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    symbols = client.symbols_progress_todo()
-    print(symbols)
+    client.update_dl_progress_of_symbol('UNCH', False, '')
 
 
 if __name__ == '__main__':
