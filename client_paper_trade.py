@@ -62,6 +62,13 @@ class ClientPaperTrade:
         with open(self.symbol_dl_progress_path, 'w') as f:
             yaml.dump(symbol_dl_progress, f, indent=2)
 
+    def load_symbol_dl_progress(self) -> dict:
+        if not os.path.exists(self.symbol_dl_progress_path):
+            self.create_symbol_dl_progress()
+        with open(self.symbol_dl_progress_path, 'r') as f:
+            symbol_dl_progress = yaml.safe_load(f)
+        return symbol_dl_progress
+
 
 def main():
     load_dotenv()
@@ -70,7 +77,8 @@ def main():
         secret_key=os.getenv('ALPACA_SECRET_KEY'),
         base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    client.create_symbol_dl_progress()
+    symbol_dl_progress = client.load_symbol_dl_progress()
+    print(symbol_dl_progress)
 
 
 if __name__ == '__main__':
