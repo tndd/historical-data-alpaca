@@ -25,7 +25,7 @@ class ClientPaperTrade:
 
     def store_assets(self) -> None:
         assets = self.get_assets()
-        with open(f"{self.store_path}/bars/assets.json", 'w') as f:
+        with open(f"{self.store_path}/assets.json", 'w') as f:
             json.dump(assets, f, indent=2)
 
 
