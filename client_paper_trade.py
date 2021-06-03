@@ -43,13 +43,13 @@ class ClientPaperTrade:
             assets = yaml.safe_load(f)
         return assets
 
-    def get_active_symbols(self) -> list:
+    def get_active_symbols_from_assets(self) -> list:
         assets = self.load_assets()
         active_assets = list(filter(lambda a: a['status'] == 'active', assets))
         return list(map(lambda a: a['symbol'], active_assets))
 
     def create_symbol_dl_progress(self) -> None:
-        symbols = self.get_active_symbols()
+        symbols = self.get_active_symbols_from_assets()
         time_now = datetime.datetime.now()
         symbol_dl_progress = dict()
         for s in symbols:
