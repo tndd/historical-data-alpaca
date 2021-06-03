@@ -27,15 +27,15 @@ class ClientPaperTrade:
         r = requests.get(url, headers=self.get_auth_headers())
         return r.json()
 
-    def store_assets(self) -> None:
+    def download_assets(self) -> None:
         assets = self.get_assets()
         with open(self.assets_path, 'w') as f:
             yaml.dump(assets, f, indent=2)
 
     def load_assets(self) -> dict:
-        # if not exist assets data
+        # if not exist assets data, download it.
         if not os.path.exists(self.assets_path):
-            self.store_assets()
+            self.download_assets()
         with open(self.assets_path, 'r') as f:
             assets = yaml.safe_load(f)
         return assets
