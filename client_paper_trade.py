@@ -73,6 +73,10 @@ class ClientPaperTrade:
     def symbols_progress_todo(self) -> list:
         return [s for s, d in self.symbol_dl_progress.items() if d['f'] is False]
 
+    def update_symbol_dl_progress(self) -> None:
+        with open(self.symbol_dl_progress_path, 'w') as f:
+            yaml.dump(self.symbol_dl_progress, f, indent=2)
+
 
 def main():
     load_dotenv()
