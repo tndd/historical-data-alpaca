@@ -89,9 +89,19 @@ class ClientPaperTrade:
             is_complete: bool,
             message: str = '') -> None:
         if symbol in self._symbol_dl_progress:
-            self._symbol_dl_progress[symbol]['t'] = datetime.datetime.now()
+            # save previous progress data
+            prev_updated_time = self._symbol_dl_progress[symbol]['t']
+            prev_is_complete_flag = self._symbol_dl_progress[symbol]['f']
+            prev_error_message = self._symbol_dl_progress[symbol]['m']
+            # update progress data
+            self._symbol_dl_progress[symbol]['t'] = datetime.datetime.now().isoformat()
             self._symbol_dl_progress[symbol]['f'] = is_complete
             self._symbol_dl_progress[symbol]['m'] = message
+            # report progress data log
+            logger.debug(f"update symbol \"{symbol}\", ")
+            logger.debug(f"is_complete: \"{prev_is_complete_flag}\" -> \"{self._symbol_dl_progress[symbol]['f']}\"")
+            logger.debug(f"error_message: \"{prev_error_message}\" -> \"{self._symbol_dl_progress[symbol]['m']}\"")
+            logger.debug(f"update_time: \"{prev_updated_time}\" -> \"{self._symbol_dl_progress[symbol]['t']}\"")
             self.update_symbol_dl_progress()
         else:
             logger.error(f"symbol \"{symbol}\" is not exist.")
@@ -104,7 +114,7 @@ def main():
         _secret_key=os.getenv('ALPACA_SECRET_KEY'),
         _base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
-    client.update_dl_progress_of_symbol('UNCH', False, '')
+    client.update_dl_progress_of_symbol('A', True, '')
 
 
 if __name__ == '__main__':
