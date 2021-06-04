@@ -4,9 +4,11 @@ import os
 import datetime
 from dotenv import load_dotenv
 from dataclasses import dataclass
-from logging import getLogger
+from logging import getLogger, config
 
 
+os.makedirs('log', exist_ok=True)
+config.fileConfig('logging.conf')
 logger = getLogger(__name__)
 
 
