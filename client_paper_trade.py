@@ -35,16 +35,19 @@ class ClientPaperTrade:
     def get_assets(self) -> dict:
         url = f"{self._base_url}/assets"
         r = requests.get(url, headers=self.get_auth_headers())
+        logger.debug(f"request status code: \"{r.status_code}\"")
         return r.json()
 
     def download_assets(self) -> None:
         assets = self.get_assets()
         with open(self._assets_path, 'w') as f:
             yaml.dump(assets, f, indent=2)
+        logger.debug(f"assets is downloaded in \"{self._assets_path}\"")
 
     def load_assets(self) -> dict:
         # if not exist assets data, download it.
         if not os.path.exists(self._assets_path):
+            logger.debug('assets data is not exist, it will be downloaded.')
             self.download_assets()
         with open(self._assets_path, 'r') as f:
             assets = yaml.safe_load(f)
@@ -68,9 +71,11 @@ class ClientPaperTrade:
             symbol_dl_progress[s] = detail
         with open(self._symbol_dl_progress_path, 'w') as f:
             yaml.dump(symbol_dl_progress, f, indent=2)
+        logger.debug(f"symbol_dl_progress is created in \"{self._symbol_dl_progress_path}\"")
 
     def load_symbol_dl_progress(self) -> dict:
         if not os.path.exists(self._symbol_dl_progress_path):
+            logger.debug('symbol_dl_progress is not exist, it will be created.')
             self.create_symbol_dl_progress()
         with open(self._symbol_dl_progress_path, 'r') as f:
             symbol_dl_progress = yaml.safe_load(f)
@@ -82,6 +87,7 @@ class ClientPaperTrade:
     def update_symbol_dl_progress(self) -> None:
         with open(self._symbol_dl_progress_path, 'w') as f:
             yaml.dump(self._symbol_dl_progress, f, indent=2)
+        logger.debug(f"in class's \"symbol_data_progress\" is saved in {self._symbol_dl_progress_path}")
 
     def update_dl_progress_of_symbol(
             self,
@@ -97,12 +103,12 @@ class ClientPaperTrade:
             self._symbol_dl_progress[symbol]['t'] = datetime.datetime.now().isoformat()
             self._symbol_dl_progress[symbol]['f'] = is_complete
             self._symbol_dl_progress[symbol]['m'] = message
+            self.update_symbol_dl_progress()
             # report progress data log
             logger.debug((f"update symbol: \"{symbol}\", "
                           f"is_complete: \"{prev_is_complete_flag}\" -> \"{self._symbol_dl_progress[symbol]['f']}\", "
                           f"error_message: \"{prev_error_message}\" -> \"{self._symbol_dl_progress[symbol]['m']}\", "
                           f"update_time: \"{prev_updated_time}\" -> \"{self._symbol_dl_progress[symbol]['t']}\""))
-            self.update_symbol_dl_progress()
         else:
             logger.error(f"symbol \"{symbol}\" is not exist.")
 
