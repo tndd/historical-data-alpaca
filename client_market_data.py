@@ -47,7 +47,7 @@ class ClientMarketData(ClientAlpaca):
             self,
             symbol: str,
             page_token: str = None
-    ) -> None:
+    ) -> str:
         os.makedirs(f"{self._dl_bars_destination_path}/{symbol}", exist_ok=True)
         file_name = 'head' if page_token is None else page_token
         bars_segment = self.get_bars_segment(symbol, page_token)
@@ -59,6 +59,15 @@ class ClientMarketData(ClientAlpaca):
             f"file_name: \"{file_name}\", "
             f"destination: \"{bars_segment_destination}\""
         ))
+        return bars_segment['next_page_token']
+
+    def download_bars(self, symbol: str) -> None:
+        next_page_token = None
+        while True:
+            next_page_token = self.download_bars_segment(symbol, next_page_token)
+            if next_page_token is None:
+                break
+        logger.debug(f"all bars are downloaded. token: {symbol}")
 
 
 def main():
@@ -68,7 +77,7 @@ def main():
         _secret_key=os.getenv('ALPACA_SECRET_KEY'),
         _base_url=os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
     )
-    client.download_bars_segment('SPY')
+    client.download_bars('SPY')
 
 
 if __name__ == '__main__':
