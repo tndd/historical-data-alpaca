@@ -5,6 +5,7 @@ import datetime
 from dotenv import load_dotenv
 from dataclasses import dataclass
 from logging import getLogger, config
+from client_alpaca import ClientAlpaca
 
 
 os.makedirs('log', exist_ok=True)
@@ -13,11 +14,7 @@ logger = getLogger(__name__)
 
 
 @dataclass
-class ClientPaperTrade:
-    _api_key: str
-    _secret_key: str
-    _base_url: str
-    _dl_destination_path = './data'
+class ClientPaperTrade(ClientAlpaca):
     _assets_name = 'assets.yaml'
     _symbol_dl_progress_name = 'symbol_dl_progress.yaml'
 
@@ -25,12 +22,6 @@ class ClientPaperTrade:
         self._assets_path = f"{self._dl_destination_path}/{self._assets_name}"
         self._symbol_dl_progress_path = f"{self._dl_destination_path}/{self._symbol_dl_progress_name}"
         self._symbol_dl_progress = self.load_symbol_dl_progress()
-
-    def get_auth_headers(self) -> dict:
-        return {
-            "APCA-API-KEY-ID": self._api_key,
-            "APCA-API-SECRET-KEY": self._secret_key
-        }
 
     def get_assets(self) -> dict:
         url = f"{self._base_url}/assets"
