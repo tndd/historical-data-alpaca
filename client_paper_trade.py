@@ -17,13 +17,13 @@ class ClientPaperTrade:
     _api_key: str
     _secret_key: str
     _base_url: str
-    _store_dir_path = './data'
+    _dl_destination_path = './data'
     _assets_name = 'assets.yaml'
     _symbol_dl_progress_name = 'symbol_dl_progress.yaml'
 
     def __post_init__(self) -> None:
-        self._assets_path = f"{self._store_dir_path}/{self._assets_name}"
-        self._symbol_dl_progress_path = f"{self._store_dir_path}/{self._symbol_dl_progress_name}"
+        self._assets_path = f"{self._dl_destination_path}/{self._assets_name}"
+        self._symbol_dl_progress_path = f"{self._dl_destination_path}/{self._symbol_dl_progress_name}"
         self._symbol_dl_progress = self.load_symbol_dl_progress()
 
     def get_auth_headers(self) -> dict:
