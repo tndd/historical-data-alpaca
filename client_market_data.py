@@ -72,8 +72,6 @@ class ClientMarketData(ClientAlpaca):
 def main():
     load_dotenv()
     client = ClientMarketData(
-        _api_key=os.getenv('ALPACA_API_KEY'),
-        _secret_key=os.getenv('ALPACA_SECRET_KEY'),
         _base_url=os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
     )
 

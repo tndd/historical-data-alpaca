@@ -107,8 +107,6 @@ class ClientPaperTrade(ClientAlpaca):
 def main():
     load_dotenv()
     client = ClientPaperTrade(
-        _api_key=os.getenv('ALPACA_API_KEY'),
-        _secret_key=os.getenv('ALPACA_SECRET_KEY'),
         _base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
     )
     client.update_dl_progress_of_symbol('A', True, 'aa')
