@@ -19,7 +19,7 @@ class ClientMarketData(ClientAlpaca):
     _limit = 10000
 
     def __post_init__(self) -> None:
-        self._dl_bars_destination_path = f"{self._dl_destination_path}/bars"
+        self._dl_bars_destination = f"{self._dl_destination_path}/bars"
 
     def get_bars_segment(
             self,
@@ -48,16 +48,16 @@ class ClientMarketData(ClientAlpaca):
             symbol: str,
             page_token: str = None
     ) -> str:
-        os.makedirs(f"{self._dl_bars_destination_path}/{symbol}", exist_ok=True)
+        dl_bars_seg_dst = f"{self._dl_bars_destination}/{symbol}/{self._time_frame}"
+        os.makedirs(dl_bars_seg_dst, exist_ok=True)
         file_name = 'head' if page_token is None else page_token
         bars_segment = self.get_bars_segment(symbol, page_token)
-        bars_segment_destination = f"{self._dl_bars_destination_path}/{symbol}/{file_name}.yaml"
-        with open(bars_segment_destination, 'w') as f:
+        with open(f"{dl_bars_seg_dst}/{file_name}.yaml", 'w') as f:
             yaml.dump(bars_segment, f, indent=2)
         logger.debug((
             f"bars_segment is downloaded, "
             f"file_name: \"{file_name}\", "
-            f"destination: \"{bars_segment_destination}\""
+            f"destination: \"{dl_bars_seg_dst}\""
         ))
         return bars_segment['next_page_token']
 
