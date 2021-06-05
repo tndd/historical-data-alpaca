@@ -7,6 +7,7 @@ from logging import getLogger, config
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
 
+load_dotenv()
 os.makedirs('log', exist_ok=True)
 config.fileConfig('logging.conf')
 logger = getLogger(__name__)
@@ -14,6 +15,7 @@ logger = getLogger(__name__)
 
 @dataclass
 class ClientMarketData(ClientAlpaca):
+    _base_url = os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
     _start_time = '2016-01-01'
     _time_frame = '1Min'
     _limit = 10000
@@ -70,10 +72,8 @@ class ClientMarketData(ClientAlpaca):
 
 
 def main():
-    load_dotenv()
-    client = ClientMarketData(
-        _base_url=os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
-    )
+    client = ClientMarketData()
+    print(client)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from logging import getLogger, config
 from client_alpaca import ClientAlpaca
 
-
+load_dotenv()
 os.makedirs('log', exist_ok=True)
 config.fileConfig('logging.conf')
 logger = getLogger(__name__)
@@ -17,6 +17,7 @@ logger = getLogger(__name__)
 class ClientPaperTrade(ClientAlpaca):
     _assets_name = 'assets.yaml'
     _symbol_dl_progress_name = 'symbol_dl_progress.yaml'
+    _base_url = os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
 
     def __post_init__(self) -> None:
         self._assets_path = f"{self._dl_destination_path}/{self._assets_name}"
@@ -105,11 +106,8 @@ class ClientPaperTrade(ClientAlpaca):
 
 
 def main():
-    load_dotenv()
-    client = ClientPaperTrade(
-        _base_url=os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
-    )
-    client.update_dl_progress_of_symbol('A', True, 'aa')
+    client = ClientPaperTrade()
+    print(client.get_auth_headers())
 
 
 if __name__ == '__main__':

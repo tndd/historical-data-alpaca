@@ -7,7 +7,6 @@ load_dotenv()
 
 @dataclass
 class ClientAlpaca:
-    _base_url: str
     _api_key: str = os.getenv('ALPACA_API_KEY'),
     _secret_key: str = os.getenv('ALPACA_SECRET_KEY'),
     _dl_destination_path = './data'
