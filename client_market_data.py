@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from logging import getLogger, config
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
+from client_paper_trade import ClientPaperTrade
 
 load_dotenv()
 os.makedirs('log', exist_ok=True)
@@ -19,6 +20,7 @@ class ClientMarketData(ClientAlpaca):
     _start_time = '2016-01-01'
     _time_frame = '1Min'
     _limit = 10000
+    _client_pt = ClientPaperTrade()
 
     def __post_init__(self) -> None:
         self._dl_bars_destination = f"{self._dl_destination}/bars"
@@ -36,13 +38,17 @@ class ClientMarketData(ClientAlpaca):
         }
         if not (page_token is None):
             query['page_token'] = page_token
-        logger.debug(f"query: {str(query)}")
         r = requests.get(
             url,
             headers=self.get_auth_headers(),
             params=query
         )
-        logger.debug(f"request symbol: \"{symbol}\", status code: \"{r.status_code}\"")
+        logger.debug((
+            f"request symbol: \"{symbol}\", "
+            f"status code: \"{r.status_code}\", "
+            f"url: \"{url}\", "
+            f"query: {str(query)}"
+        ))
         return r.json()
 
     def download_bars_segment(
@@ -69,6 +75,10 @@ class ClientMarketData(ClientAlpaca):
             if next_page_token is None:
                 break
         logger.debug(f"all bars are downloaded. token: {symbol}")
+        self._client_pt.update_dl_progress_of_symbol(
+            symbol=symbol,
+            is_complete=True
+        )
 
 
 def main():
