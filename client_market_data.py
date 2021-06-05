@@ -21,7 +21,7 @@ class ClientMarketData(ClientAlpaca):
     _limit = 10000
 
     def __post_init__(self) -> None:
-        self._dl_bars_destination = f"{self._dl_destination_path}/bars"
+        self._dl_bars_destination = f"{self._dl_destination}/bars"
 
     def get_bars_segment(
             self,

@@ -9,7 +9,7 @@ load_dotenv()
 class ClientAlpaca:
     _api_key: str = os.getenv('ALPACA_API_KEY')
     _secret_key: str = os.getenv('ALPACA_SECRET_KEY')
-    _dl_destination_path = './data'
+    _dl_destination = './data'
 
     def get_auth_headers(self) -> dict:
         return {
