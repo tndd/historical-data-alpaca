@@ -16,6 +16,7 @@ class ClientMarketData(ClientAlpaca):
     _client_pt = ClientPaperTrade()
 
     def __post_init__(self) -> None:
+        self._logger = self._logger.getChild(__name__)
         self._dl_bars_destination = f"{self._dl_destination}/bars"
 
     def get_bars_segment(

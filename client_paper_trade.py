@@ -13,6 +13,7 @@ class ClientPaperTrade(ClientAlpaca):
     _base_url = os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
 
     def __post_init__(self) -> None:
+        self._logger = self._logger.getChild(__name__)
         self._assets_path = f"{self._dl_destination}/{self._assets_name}"
         self._symbol_dl_progress_path = f"{self._dl_destination}/{self._symbol_dl_progress_name}"
         self._symbol_dl_progress = self.load_symbol_dl_progress()
