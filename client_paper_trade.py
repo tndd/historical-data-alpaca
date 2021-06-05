@@ -91,10 +91,12 @@ class ClientPaperTrade(ClientAlpaca):
             self._symbol_dl_progress[symbol]['m'] = message
             self.update_symbol_dl_progress()
             # report progress data log
-            self._logger.debug((f"update symbol: \"{symbol}\", "
-                          f"is_complete: \"{prev_is_complete_flag}\" -> \"{self._symbol_dl_progress[symbol]['f']}\", "
-                          f"error_message: \"{prev_error_message}\" -> \"{self._symbol_dl_progress[symbol]['m']}\", "
-                          f"update_time: \"{prev_updated_time}\" -> \"{self._symbol_dl_progress[symbol]['t']}\""))
+            self._logger.debug((
+                f"update symbol: \"{symbol}\", "
+                f"is_complete: \"{prev_is_complete_flag}\" -> \"{self._symbol_dl_progress[symbol]['f']}\", "
+                f"error_message: \"{prev_error_message}\" -> \"{self._symbol_dl_progress[symbol]['m']}\", "
+                f"update_time: \"{prev_updated_time}\" -> \"{self._symbol_dl_progress[symbol]['t']}\""
+            ))
         else:
             self._logger.error(f"symbol \"{symbol}\" is not exist.")
 
