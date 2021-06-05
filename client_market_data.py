@@ -1,17 +1,10 @@
 import os
 import requests
 import yaml
-from dotenv import load_dotenv
 from dataclasses import dataclass
-from logging import getLogger, config
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
 from client_paper_trade import ClientPaperTrade
-
-load_dotenv()
-os.makedirs('log', exist_ok=True)
-config.fileConfig('logging.conf')
-logger = getLogger(__name__)
 
 
 @dataclass
@@ -43,7 +36,7 @@ class ClientMarketData(ClientAlpaca):
             headers=self.get_auth_headers(),
             params=query
         )
-        logger.debug((
+        self._logger.debug((
             f"request symbol: \"{symbol}\", "
             f"status code: \"{r.status_code}\", "
             f"url: \"{url}\", "
@@ -61,7 +54,7 @@ class ClientMarketData(ClientAlpaca):
         bars_segment = self.get_bars_segment(symbol, page_token)
         with open(f"{dl_bars_seg_dst}/{file_name}.yaml", 'w') as f:
             yaml.dump(bars_segment, f, indent=2)
-        logger.debug((
+        self._logger.debug((
             f"bars_segment is downloaded, "
             f"file_name: \"{file_name}\", "
             f"destination: \"{dl_bars_seg_dst}\""
@@ -74,7 +67,7 @@ class ClientMarketData(ClientAlpaca):
             next_page_token = self.download_bars_segment(symbol, next_page_token)
             if next_page_token is None:
                 break
-        logger.debug(f"all bars are downloaded. token: {symbol}")
+        self._logger.debug(f"all bars are downloaded. token: {symbol}")
         self._client_pt.update_dl_progress_of_symbol(
             symbol=symbol,
             is_complete=True
@@ -83,7 +76,7 @@ class ClientMarketData(ClientAlpaca):
 
 def main():
     client = ClientMarketData()
-    print(client)
+    # print(client)
 
 
 if __name__ == '__main__':

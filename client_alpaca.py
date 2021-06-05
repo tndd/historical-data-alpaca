@@ -1,8 +1,11 @@
 import os
 from dataclasses import dataclass
 from dotenv import load_dotenv
+from logging import getLogger, config, Logger
 
 load_dotenv()
+os.makedirs('log', exist_ok=True)
+config.fileConfig('logging.conf')
 
 
 @dataclass
@@ -10,6 +13,7 @@ class ClientAlpaca:
     _api_key: str = os.getenv('ALPACA_API_KEY')
     _secret_key: str = os.getenv('ALPACA_SECRET_KEY')
     _dl_destination = './data'
+    _logger: Logger = getLogger(__name__)
 
     def get_auth_headers(self) -> dict:
         return {
