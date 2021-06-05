@@ -49,7 +49,7 @@ class ClientPaperTrade(ClientAlpaca):
         active_assets = list(filter(lambda a: a['status'] == 'active', assets))
         return list(map(lambda a: a['symbol'], active_assets))
 
-    def create_symbol_dl_progress(self) -> None:
+    def init_symbol_dl_progress(self) -> None:
         symbols = self.get_active_symbols_from_assets()
         time_now = datetime.datetime.now()
         symbol_dl_progress = dict()
@@ -62,12 +62,12 @@ class ClientPaperTrade(ClientAlpaca):
             symbol_dl_progress[s] = detail
         with open(self._symbol_dl_progress_path, 'w') as f:
             yaml.dump(symbol_dl_progress, f, indent=2)
-        logger.debug(f"symbol_dl_progress is created in \"{self._symbol_dl_progress_path}\"")
+        logger.debug(f"symbol_dl_progress is initialized, saved in \"{self._symbol_dl_progress_path}\"")
 
     def load_symbol_dl_progress(self) -> dict:
         if not os.path.exists(self._symbol_dl_progress_path):
             logger.debug('symbol_dl_progress is not exist, it will be created.')
-            self.create_symbol_dl_progress()
+            self.init_symbol_dl_progress()
         with open(self._symbol_dl_progress_path, 'r') as f:
             symbol_dl_progress = yaml.safe_load(f)
         return symbol_dl_progress
