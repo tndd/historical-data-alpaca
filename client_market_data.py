@@ -29,7 +29,8 @@ class ClientMarketData(ClientAlpaca):
     def _get_bars_segment(
             self,
             symbol: str,
-            page_token: str = None) -> dict:
+            page_token: str = None
+    ) -> dict:
         url = f"{self._base_url}/stocks/{symbol}/bars"
         query = {
             'start': self._start_time,
@@ -55,7 +56,8 @@ class ClientMarketData(ClientAlpaca):
     def _download_bars_segment(
             self,
             symbol: str,
-            page_token: str = None) -> str:
+            page_token: str = None
+    ) -> str:
         dl_bars_seg_dst = f"{self._dl_bars_destination}/{symbol}/{self._time_frame}"
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
         file_name = 'head' if page_token is None else page_token
