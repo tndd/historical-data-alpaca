@@ -43,19 +43,26 @@ class ClientDB:
                     `high` double NOT NULL,
                     `low` double NOT NULL,
                     `close` double NOT NULL,
-                    `volume` mediumint unsigned NOT NULL,
+                    `volume` int unsigned NOT NULL,
                     PRIMARY KEY (`time`,`symbol`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
                 '''
         self._cur.execute(query)
 
     def insert_lines_to_historical_bars_1min(self, lines: list) -> None:
+        # split lines every 500,000
+        chunk = 500000
+        lines_len = len(lines)
+        self._logger.debug(f"insert num: {lines_len}")
+        lines_parts = [lines[i:i+chunk] for i in range(0, lines_len, chunk)]
         query = '''
                 INSERT INTO alpaca_market_db.historical_bars_1min (
                     `time`, symbol, `open`, high, low, `close`, volume
                 ) VALUES(%s, %s, %s, %s, %s, %s, %s);
                 '''
-        self._cur.executemany(query, lines)
+        for i, l_part in enumerate(lines_parts):
+            self._cur.executemany(query, l_part)
+            self._logger.debug(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
         self._conn.commit()
 
 

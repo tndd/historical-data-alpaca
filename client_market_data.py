@@ -87,10 +87,13 @@ class ClientMarketData(ClientAlpaca):
         if len(bars_paths) == 0:
             self._logger.debug(f"bars data: \"{symbol}\" is not exist, it will be downloaded.")
             self.download_bars(symbol)
+        # recount bars data num
+        bars_num = len(bars_paths)
+        self._logger.debug(f"symbol: \"{symbol}\" bars data num: \"{bars_num}\"")
         bars_lines = []
         start_time = datetime.now()
         prev_time = start_time
-        for bars_path in bars_paths:
+        for i, bars_path in enumerate(bars_paths):
             with open(bars_path, 'r') as f:
                 d = yaml.safe_load(f)
             for bar in d['bars']:
@@ -98,7 +101,11 @@ class ClientMarketData(ClientAlpaca):
                 bar_time = datetime.strptime(bar['t'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S')
                 bars_lines.append([bar_time, symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
             now_time = datetime.now()
-            self._logger.debug(f"loaded: \"{bars_path}\", load time: \"{now_time - prev_time}\"")
+            self._logger.debug((
+                f"progress: \"{i + 1}/{bars_num}\", "
+                f"load time: \"{now_time - prev_time}\", "
+                f"loaded: \"{bars_path}\""
+            ))
             prev_time = now_time
         # sort ascending by time
         bars_lines.sort(key=lambda b: b[0])
