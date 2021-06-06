@@ -16,7 +16,6 @@ class ClientMarketData(ClientAlpaca):
     _start_time = '2016-01-01'
     _time_frame = '1Min'
     _limit = 10000
-    _client_pt = ClientPaperTrade()
     _client_db = ClientDB()
 
     def __post_init__(self) -> None:
@@ -66,8 +65,12 @@ class ClientMarketData(ClientAlpaca):
         ))
         return bars_segment['next_page_token']
 
-    def download_bars(self, symbol: str) -> bool:
-        if self._client_pt.is_symbol_downloadable(symbol) is False:
+    def download_bars(
+            self,
+            symbol: str,
+            client_pt: ClientPaperTrade = ClientPaperTrade()
+    ) -> bool:
+        if client_pt.is_symbol_downloadable(symbol) is False:
             self._logger.debug(f'download bars "{symbol}" is skipped.')
             return False
         next_page_token = None
@@ -76,7 +79,7 @@ class ClientMarketData(ClientAlpaca):
             if next_page_token is None:
                 break
         self._logger.debug(f"all bars are downloaded. symbol: {symbol}")
-        self._client_pt.update_dl_progress_of_symbol(
+        client_pt.update_dl_progress_of_symbol(
             symbol=symbol,
             is_complete=True
         )
@@ -143,6 +146,7 @@ class ClientMarketData(ClientAlpaca):
 
 
 def main():
+    # TODO: create exception class for error
     client = ClientMarketData()
     df = client.load_bars_df('UNCH')
     print(df)
