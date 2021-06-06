@@ -78,6 +78,10 @@ class ClientMarketData(ClientAlpaca):
     def load_bars_lines(self, symbol: str, timeframe: str = '1Min'):
         bars_dir_path = f"{self._dl_bars_destination}/{symbol}/{timeframe}"
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
+        # download bars data if not exist it.
+        if len(bars_paths) == 0:
+            self._logger.debug(f"bars data: \"{symbol}\" is not exist, it will be downloaded.")
+            self.download_bars(symbol)
         bars_lines = []
         start_time = datetime.now()
         prev_time = start_time
