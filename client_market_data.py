@@ -10,6 +10,10 @@ from client_paper_trade import ClientPaperTrade
 from client_db import ClientDB
 
 
+class SymbolIsNotDownloadable(Exception):
+    pass
+
+
 @dataclass
 class ClientMarketData(ClientAlpaca):
     _base_url = os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
@@ -69,10 +73,9 @@ class ClientMarketData(ClientAlpaca):
             self,
             symbol: str,
             client_pt: ClientPaperTrade = ClientPaperTrade()
-    ) -> bool:
+    ) -> None:
         if client_pt.is_symbol_downloadable(symbol) is False:
-            self._logger.debug(f'download bars "{symbol}" is skipped.')
-            return False
+            raise SymbolIsNotDownloadable(f'symbol "{symbol}" is not downloadable.')
         next_page_token = None
         while True:
             next_page_token = self._download_bars_segment(symbol, next_page_token)
@@ -83,18 +86,14 @@ class ClientMarketData(ClientAlpaca):
             symbol=symbol,
             is_complete=True
         )
-        return True
 
     def load_bars_lines(self, symbol: str) -> list:
         bars_dir_path = f"{self._dl_bars_destination}/{symbol}/{self._time_frame}"
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
         # download bars data if not exist it.
         if len(bars_paths) == 0:
-            self._logger.debug(f'bars data file "{symbol}" is not exist, it will be downloaded.')
-            if self.download_bars(symbol) is False:
-                # if the download doesn't occur, abort the process.
-                self._logger.debug(f'loading bars_lines "{symbol}" is interrupted because download did not take place.')
-                return []
+            self._logger.debug(f'bars data files "{symbol}" is not exist, it will be downloaded.')
+            self.download_bars(symbol)
         # recount bars data num
         bars_num = len(bars_paths)
         self._logger.debug(f"symbol: \"{symbol}\" bars data num: \"{bars_num}\"")
@@ -124,29 +123,19 @@ class ClientMarketData(ClientAlpaca):
         ))
         return bars_lines
 
-    def store_bars_to_db(self, symbol: str) -> bool:
+    def store_bars_to_db(self, symbol: str) -> None:
         bars_lines = self.load_bars_lines(symbol)
-        if len(bars_lines) == 0:
-            self._logger.debug(f'loaded bars_lines "{symbol}" is empty, so this process cannot save data to db.')
-            return False
         self._client_db.insert_lines_to_historical_bars_1min(bars_lines)
         self._logger.debug(f"bars \"{symbol}\" is stored to db.")
-        return True
 
     def load_bars_df(self, symbol: str) -> pd.DataFrame:
         if self._client_db.count_symbol_table_historical_bars_1min(symbol) == 0:
             self._logger.debug(f'bars "{symbol}" is not exist in db, it will be stored.')
-            if self.store_bars_to_db(symbol) is False:
-                self._logger.debug((
-                    f'bars_lines "{symbol}" cannot load from db, '
-                    f'so this process cannot make bars dataframe.'
-                ))
-                return pd.DataFrame()
+            self.store_bars_to_db(symbol)
         return self._client_db.load_table_historical_bars_1min_dataframe(symbol)
 
 
 def main():
-    # TODO: create exception class for error
     client = ClientMarketData()
     df = client.load_bars_df('UNCH')
     print(df)
