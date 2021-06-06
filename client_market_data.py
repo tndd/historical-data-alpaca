@@ -22,7 +22,7 @@ class ClientMarketData(ClientAlpaca):
         self._logger = self._logger.getChild(__name__)
         self._dl_bars_destination = f"{self._dl_destination}/bars"
 
-    def get_bars_segment(
+    def _get_bars_segment(
             self,
             symbol: str,
             page_token: str = None) -> dict:
@@ -48,14 +48,14 @@ class ClientMarketData(ClientAlpaca):
         ))
         return r.json()
 
-    def download_bars_segment(
+    def _download_bars_segment(
             self,
             symbol: str,
             page_token: str = None) -> str:
         dl_bars_seg_dst = f"{self._dl_bars_destination}/{symbol}/{self._time_frame}"
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
         file_name = 'head' if page_token is None else page_token
-        bars_segment = self.get_bars_segment(symbol, page_token)
+        bars_segment = self._get_bars_segment(symbol, page_token)
         with open(f"{dl_bars_seg_dst}/{file_name}.yaml", 'w') as f:
             yaml.dump(bars_segment, f, indent=2)
         self._logger.debug((
@@ -66,12 +66,15 @@ class ClientMarketData(ClientAlpaca):
         return bars_segment['next_page_token']
 
     def download_bars(self, symbol: str) -> None:
+        if self._client_pt.is_symbol_downloadable(symbol) is False:
+            self._logger.debug(f"symbol: {symbol} downloading is skipped.")
+            return
         next_page_token = None
         while True:
-            next_page_token = self.download_bars_segment(symbol, next_page_token)
+            next_page_token = self._download_bars_segment(symbol, next_page_token)
             if next_page_token is None:
                 break
-        self._logger.debug(f"all bars are downloaded. token: {symbol}")
+        self._logger.debug(f"all bars are downloaded. symbol: {symbol}")
         self._client_pt.update_dl_progress_of_symbol(
             symbol=symbol,
             is_complete=True

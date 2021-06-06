@@ -100,6 +100,17 @@ class ClientPaperTrade(ClientAlpaca):
         else:
             self._logger.error(f"symbol \"{symbol}\" is not exist.")
 
+    def is_symbol_downloadable(self, symbol: str) -> bool:
+        # is exist symbol?
+        if not (symbol in self._symbol_dl_progress.keys()):
+            self._logger.debug(f"symbol: \"{symbol}\" is not exist in symbol_dl_progress.")
+            return False
+        # is completed download?
+        elif self._symbol_dl_progress[symbol]['f'] is True:
+            self._logger.debug(f"symbol: \"{symbol}\" is already downloaded.")
+        else:
+            return True
+
 
 def main():
     client = ClientPaperTrade()
