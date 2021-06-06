@@ -18,14 +18,14 @@ class SymbolIsNotDownloadable(Exception):
 class ClientMarketData(ClientAlpaca):
     _base_url = os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
     _start_time = '2016-01-01'
-    _time_frame = '1Min'
+    time_frame = '1Min'
     _limit = 10000
     _client_pt = ClientPaperTrade()
     _client_db = ClientDB()
 
     def __post_init__(self) -> None:
         self._logger = self._logger.getChild(__name__)
-        self._dl_bars_destination = f"{self._dl_destination}/bars"
+        self.dl_bars_destination = f"{self._dl_destination}/bars"
 
     def _get_bars_segment(
             self,
@@ -36,7 +36,7 @@ class ClientMarketData(ClientAlpaca):
         query = {
             'start': self._start_time,
             'end': (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d'),
-            'timeframe': self._time_frame,
+            'timeframe': self.time_frame,
             'limit': self._limit
         }
         if not (page_token is None):
@@ -59,7 +59,7 @@ class ClientMarketData(ClientAlpaca):
             symbol: str,
             page_token: str = None
     ) -> str:
-        dl_bars_seg_dst = f"{self._dl_bars_destination}/{symbol}/{self._time_frame}"
+        dl_bars_seg_dst = f"{self.dl_bars_destination}/{symbol}/{self.time_frame}"
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
         file_name = 'head' if page_token is None else page_token
         bars_segment = self._get_bars_segment(symbol, page_token)
@@ -86,60 +86,10 @@ class ClientMarketData(ClientAlpaca):
             is_complete=True
         )
 
-    # the client should only be responsible for the communication part of the api.
-    # TODO: Separate under functions to "repository_market_data"
-    def load_bars_lines(self, symbol: str) -> list:
-        bars_dir_path = f"{self._dl_bars_destination}/{symbol}/{self._time_frame}"
-        bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
-        # download bars data if not exist it.
-        if len(bars_paths) == 0:
-            self._logger.debug(f'bars data files "{symbol}" is not exist, it will be downloaded.')
-            self.download_bars(symbol)
-        # recount bars data num
-        bars_num = len(bars_paths)
-        self._logger.debug(f"symbol: \"{symbol}\" bars data num: \"{bars_num}\"")
-        bars_lines = []
-        start_time = datetime.now()
-        prev_time = start_time
-        for i, bars_path in enumerate(bars_paths):
-            with open(bars_path, 'r') as f:
-                d = yaml.safe_load(f)
-            for bar in d['bars']:
-                # convert format RFC3339 to mysql_datetime
-                bar_time = datetime.strptime(bar['t'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S')
-                bars_lines.append([bar_time, symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
-            now_time = datetime.now()
-            self._logger.debug((
-                f"progress: \"{i + 1}/{bars_num}\", "
-                f"load time: \"{now_time - prev_time}\", "
-                f"loaded: \"{bars_path}\""
-            ))
-            prev_time = now_time
-        # sort ascending by time
-        bars_lines.sort(key=lambda b: b[0])
-        self._logger.debug((
-            f"{symbol} bars_lines is loaded. "
-            f"total time: \"{datetime.now() - start_time}\", "
-            f"sort time: \"{datetime.now() - prev_time}\""
-        ))
-        return bars_lines
-
-    def store_bars_to_db(self, symbol: str) -> None:
-        bars_lines = self.load_bars_lines(symbol)
-        self._client_db.insert_lines_to_historical_bars_1min(bars_lines)
-        self._logger.debug(f"bars \"{symbol}\" is stored to db.")
-
-    def load_bars_df(self, symbol: str) -> pd.DataFrame:
-        if self._client_db.count_symbol_table_historical_bars_1min(symbol) == 0:
-            self._logger.debug(f'bars "{symbol}" is not exist in db, it will be stored.')
-            self.store_bars_to_db(symbol)
-        return self._client_db.load_table_historical_bars_1min_dataframe(symbol)
-
 
 def main():
     client = ClientMarketData()
-    df = client.load_bars_df('UNCH')
-    print(df)
+    print(client)
 
 
 if __name__ == '__main__':
