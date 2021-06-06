@@ -1,6 +1,7 @@
 import os
 import requests
 import yaml
+import glob
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
@@ -74,10 +75,22 @@ class ClientMarketData(ClientAlpaca):
             is_complete=True
         )
 
+    def load_bars_lines(self, symbol: str, timeframe: str = '1Min'):
+        bars_dir_path = f"{self._dl_bars_destination}/{symbol}/{timeframe}"
+        bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
+        bars_lines = []
+        for bars_path in bars_paths:
+            with open(bars_path, 'r') as f:
+                d = yaml.safe_load(f)
+            for bar in d['bars']:
+                bars_lines.append([bar['t'], symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
+            self._logger.debug(f"loaded: \"{bars_path}\"")
+        return bars_lines
+
 
 def main():
     client = ClientMarketData()
-    # print(client)
+    client.load_bars_lines('SPY')
 
 
 if __name__ == '__main__':
