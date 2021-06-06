@@ -79,12 +79,23 @@ class ClientMarketData(ClientAlpaca):
         bars_dir_path = f"{self._dl_bars_destination}/{symbol}/{timeframe}"
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
         bars_lines = []
+        start_time = datetime.now()
+        prev_time = start_time
         for bars_path in bars_paths:
             with open(bars_path, 'r') as f:
                 d = yaml.safe_load(f)
             for bar in d['bars']:
                 bars_lines.append([bar['t'], symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
-            self._logger.debug(f"loaded: \"{bars_path}\"")
+            now_time = datetime.now()
+            self._logger.debug(f"loaded: \"{bars_path}\", load time: \"{now_time - prev_time}\"")
+            prev_time = now_time
+        # sort ascending by time
+        bars_lines.sort(key=lambda b: b[0])
+        self._logger.debug((
+            f"{symbol} bars_lines is loaded. "
+            f"total time: \"{datetime.now() - start_time}\", "
+            f"sort time: \"{datetime.now() - prev_time}\""
+        ))
         return bars_lines
 
 
