@@ -2,6 +2,7 @@ import os
 import requests
 import yaml
 import glob
+import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
@@ -120,6 +121,9 @@ class ClientMarketData(ClientAlpaca):
         bars_lines = self.load_bars_lines(symbol)
         self._client_db.insert_lines_to_historical_bars_1min(bars_lines)
         self._logger.debug(f"bars \"{symbol}\" is stored to db.")
+
+    def load_bars_df(self, symbol: str) -> pd.DataFrame:
+        return self._client_db.load_table_historical_bars_1min_dataframe(symbol)
 
 
 def main():
