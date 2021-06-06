@@ -49,6 +49,15 @@ class ClientDB:
                 '''
         self._cur.execute(query)
 
+    def insert_lines_to_historical_bars_1min(self, lines: list) -> None:
+        query = '''
+                INSERT INTO alpaca_market_db.historical_bars_1min (
+                    `time`, symbol, `open`, high, low, `close`, volume
+                ) VALUES(%s, %s, %s, %s, %s, %s, %s);
+                '''
+        self._cur.executemany(query, lines)
+        self._conn.commit()
+
 
 def main():
     client = ClientDB()

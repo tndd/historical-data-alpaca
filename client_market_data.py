@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
 from client_paper_trade import ClientPaperTrade
+from client_db import ClientDB
 
 
 @dataclass
@@ -15,6 +16,7 @@ class ClientMarketData(ClientAlpaca):
     _time_frame = '1Min'
     _limit = 10000
     _client_pt = ClientPaperTrade()
+    _client_db = ClientDB()
 
     def __post_init__(self) -> None:
         self._logger = self._logger.getChild(__name__)
@@ -89,7 +91,9 @@ class ClientMarketData(ClientAlpaca):
             with open(bars_path, 'r') as f:
                 d = yaml.safe_load(f)
             for bar in d['bars']:
-                bars_lines.append([bar['t'], symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
+                # convert format RFC3339 to mysql_datetime
+                bar_time = datetime.strptime(bar['t'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S')
+                bars_lines.append([bar_time, symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
             now_time = datetime.now()
             self._logger.debug(f"loaded: \"{bars_path}\", load time: \"{now_time - prev_time}\"")
             prev_time = now_time
@@ -102,10 +106,15 @@ class ClientMarketData(ClientAlpaca):
         ))
         return bars_lines
 
+    def store_bars_to_db(self, symbol: str) -> None:
+        bars_lines = self.load_bars_lines(symbol)
+        self._client_db.insert_lines_to_historical_bars_1min(bars_lines)
+        self._logger.debug(f"bars \"{symbol}\" is stored to db.")
+
 
 def main():
     client = ClientMarketData()
-    client.load_bars_lines('SPY')
+    client.store_bars_to_db('SPY')
 
 
 if __name__ == '__main__':
