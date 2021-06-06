@@ -89,6 +89,8 @@ class ClientMarketData(ClientAlpaca):
             is_complete=True
         )
 
+    # the client should only be responsible for the communication part of the api.
+    # TODO: Separate under functions to "repository_market_data"
     def load_bars_lines(self, symbol: str) -> list:
         bars_dir_path = f"{self._dl_bars_destination}/{symbol}/{self._time_frame}"
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
