@@ -1,5 +1,6 @@
 import os
 import mysql.connector
+import pandas as pd
 from dataclasses import dataclass
 from dotenv import load_dotenv
 from logging import getLogger, config, Logger
@@ -65,10 +66,20 @@ class ClientDB:
             self._logger.debug(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
         self._conn.commit()
 
+    def load_table_historical_bars_1min_dataframe(self, symbol: str) -> pd.DataFrame:
+        query = f'''
+            SELECT `time`, symbol, `open`, high, low, `close`, volume
+            FROM alpaca_market_db.historical_bars_1min
+            WHERE symbol = '{symbol}'
+            order by time
+        '''
+        return pd.read_sql(query, self._conn)
+
 
 def main():
     client = ClientDB()
-    print(client)
+    df = client.load_table_historical_bars_1min_dataframe('SPY')
+    print(df)
 
 
 if __name__ == '__main__':
