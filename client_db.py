@@ -66,6 +66,14 @@ class ClientDB:
             self._logger.debug(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
         self._conn.commit()
 
+    def count_symbol_table_historical_bars_1min(self, symbol: str) -> int:
+        query = f'''
+            SELECT COUNT(*) FROM historical_bars_1min
+            WHERE symbol = '{symbol}';
+        '''
+        self._cur.execute(query)
+        return self._cur.fetchone()[0]
+
     def load_table_historical_bars_1min_dataframe(self, symbol: str) -> pd.DataFrame:
         query = f'''
             SELECT `time`, symbol, `open`, high, low, `close`, volume
@@ -78,8 +86,8 @@ class ClientDB:
 
 def main():
     client = ClientDB()
-    df = client.load_table_historical_bars_1min_dataframe('SPY')
-    print(df)
+    n = client.count_symbol_table_historical_bars_1min('SPY')
+    print(n)
 
 
 if __name__ == '__main__':
