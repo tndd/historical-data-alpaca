@@ -10,7 +10,7 @@ from client_paper_trade import ClientPaperTrade
 from client_db import ClientDB
 
 
-class SymbolIsNotDownloadable(Exception):
+class SymbolNotDownloadable(Exception):
     pass
 
 
@@ -74,7 +74,7 @@ class ClientMarketData(ClientAlpaca):
 
     def download_bars(self, symbol: str) -> None:
         if self._client_pt.is_symbol_downloadable(symbol) is False:
-            raise SymbolIsNotDownloadable(f'symbol "{symbol}" is not downloadable.')
+            raise SymbolNotDownloadable(f'symbol "{symbol}" is not downloadable.')
         next_page_token = None
         while True:
             next_page_token = self._download_bars_segment(symbol, next_page_token)
