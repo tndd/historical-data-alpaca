@@ -19,7 +19,7 @@ class RepositoryMarketData:
     _client_db: ClientDB = ClientDB()
 
     def load_bars_lines(self, symbol: str) -> list:
-        bars_dir_path = f"{self._client_md.dl_bars_destination}/{symbol}/{self._client_md.time_frame}"
+        bars_dir_path = self._client_md.get_dl_bars_destination(symbol)
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
         # download bars data if not exist it.
         if len(bars_paths) == 0:

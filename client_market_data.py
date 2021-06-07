@@ -5,6 +5,7 @@ import glob
 import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from enum import Enum
 from client_alpaca import ClientAlpaca
 from client_paper_trade import ClientPaperTrade
 from client_db import ClientDB
@@ -15,13 +16,20 @@ class SymbolNotDownloadable(Exception):
 
 
 @dataclass
+class TimeFrame(Enum):
+    MIN = '1Min'
+    HOUR = '1Hour'
+    DAY = '1DAY'
+
+
+@dataclass
 class ClientMarketData(ClientAlpaca):
-    _base_url = os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
-    _start_time = '2016-01-01'
-    time_frame = '1Min'
-    _limit = 10000
-    _client_pt = ClientPaperTrade()
-    _client_db = ClientDB()
+    _base_url: str = os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
+    _start_time: str = '2016-01-01'
+    _time_frame: TimeFrame = TimeFrame.MIN
+    _limit: int = 10000
+    _client_pt: ClientPaperTrade = ClientPaperTrade()
+    _client_db: ClientDB = ClientDB()
 
     def __post_init__(self) -> None:
         self._logger = self._logger.getChild(__name__)
@@ -36,7 +44,7 @@ class ClientMarketData(ClientAlpaca):
         query = {
             'start': self._start_time,
             'end': (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d'),
-            'timeframe': self.time_frame,
+            'timeframe': self._time_frame.value,
             'limit': self._limit
         }
         if not (page_token is None):
@@ -54,12 +62,15 @@ class ClientMarketData(ClientAlpaca):
         ))
         return r.json()
 
+    def get_dl_bars_destination(self, symbol: str) -> str:
+        return f"{self.dl_bars_destination}/{symbol}/{self._time_frame.value}"
+
     def _download_bars_segment(
             self,
             symbol: str,
             page_token: str = None
     ) -> str:
-        dl_bars_seg_dst = f"{self.dl_bars_destination}/{symbol}/{self.time_frame}"
+        dl_bars_seg_dst = self.get_dl_bars_destination(symbol)
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
         file_name = 'head' if page_token is None else page_token
         bars_segment = self._get_bars_segment(symbol, page_token)
