@@ -2,6 +2,7 @@ import os
 import requests
 import yaml
 import time
+import shutil
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -106,7 +107,16 @@ class ClientMarketData(ClientAlpaca):
         if self._client_pt.is_symbol_downloaded(symbol) is True:
             self._logger.debug(f'Bars data "{symbol} is already downloaded. skip dl.')
             return
-        # TODO: clear incompleteness bars files of symbol before download new bars files.
+        # clear incompleteness bars files
+        dl_bars_seg_dst = self.get_dl_bars_destination(symbol)
+        if os.path.exists(dl_bars_seg_dst):
+            shutil.rmtree(dl_bars_seg_dst)
+            self._logger.debug((
+                f'Removed bars directory because of discovered incompleteness data files. '
+                f'symbol: "{symbol}", '
+                f'path: "{dl_bars_seg_dst}"'
+            ))
+        # download bars of symbol
         next_page_token = None
         time_start = datetime.now()
         while True:
@@ -114,6 +124,7 @@ class ClientMarketData(ClientAlpaca):
             if next_page_token is None:
                 break
         self._logger.debug(f'Download bars data set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
+        # update download progress status
         self._client_pt.update_dl_progress_of_symbol(
             symbol=symbol,
             is_complete=True
