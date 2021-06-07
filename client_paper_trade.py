@@ -68,11 +68,14 @@ class ClientPaperTrade(ClientAlpaca):
         self._logger.debug(f'Initialized symbol_dl_progress, saved in "{self._symbol_dl_progress_path}"')
 
     def load_symbol_dl_progress(self) -> dict:
+        self._logger.debug('Loading symbol_dl_progress.')
         if not os.path.exists(self._symbol_dl_progress_path):
             self._logger.debug('"symbol_dl_progress" is not exist, it will be created.')
             self.init_symbol_dl_progress()
+        time_start = datetime.datetime.now()
         with open(self._symbol_dl_progress_path, 'r') as f:
             symbol_dl_progress = yaml.safe_load(f)
+        self._logger.debug(f'Loaded symbol_dl_progress. time: "{datetime.datetime.now() - time_start}')
         return symbol_dl_progress
 
     def get_symbols_progress_todo(
