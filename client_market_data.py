@@ -5,10 +5,10 @@ import time
 import shutil
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from enum import Enum
 from client_alpaca import ClientAlpaca
 from client_paper_trade import ClientPaperTrade
 from client_db import ClientDB
+from models.data import TimeFrame
 
 
 class SymbolNotDownloadable(Exception):
@@ -17,13 +17,6 @@ class SymbolNotDownloadable(Exception):
 
 class AlpacaApiRateLimit(Exception):
     pass
-
-
-@dataclass
-class TimeFrame(Enum):
-    MIN = '1Min'
-    HOUR = '1Hour'
-    DAY = '1Day'
 
 
 @dataclass
