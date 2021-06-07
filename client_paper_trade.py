@@ -54,6 +54,7 @@ class ClientPaperTrade(ClientAlpaca):
                 continue
             base_status = {
                 'latest_data_time': '',
+                'is_completed': False,
                 'message': ''
             }
             symbol = asset['symbol']
