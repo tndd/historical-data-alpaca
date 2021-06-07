@@ -4,7 +4,7 @@ import os
 import datetime
 from dataclasses import dataclass
 from client_alpaca import ClientAlpaca
-from models.data import MarketDataType
+from models.data import MarketDataType, PriceDataType, TimeFrame
 
 
 @dataclass
@@ -62,10 +62,10 @@ class ClientPaperTrade(ClientAlpaca):
             symbol_dl_progress[symbol] = {
                 'id': asset['id'],
                 MarketDataType.HIST.value: {
-                    'bars': {
-                        'min': base_status.copy(),
-                        'hour': base_status.copy(),
-                        'day': base_status.copy()
+                    PriceDataType.BAR.value: {
+                        TimeFrame.MIN.value: base_status.copy(),
+                        TimeFrame.HOUR.value: base_status.copy(),
+                        TimeFrame.DAY.value: base_status.copy()
                     }
                 }
             }
@@ -98,11 +98,13 @@ class ClientPaperTrade(ClientAlpaca):
 
     def get_symbols_progress_todo(
             self,
-            market_data_type: MarketDataType = MarketDataType.HIST,
+            market_dt: MarketDataType = MarketDataType.HIST,
+            price_dt: PriceDataType = PriceDataType.BAR,
+            time_frame: TimeFrame = TimeFrame.MIN
     ) -> list:
         return [
             symbol for symbol, d in self._symbol_dl_progress.items()
-            if d[market_data_type.value]['bars']['min']['latest_data_time'] == ''
+            if d[market_dt.value][price_dt.value][time_frame.value]['latest_data_time'] == ''
         ]
 
     def update_symbol_dl_progress(self) -> None:
