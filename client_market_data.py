@@ -9,18 +9,7 @@ from client_alpaca import ClientAlpaca
 from client_paper_trade import ClientPaperTrade
 from client_db import ClientDB
 from data_types import TimeFrame
-
-
-class SymbolNotDownloadable(Exception):
-    pass
-
-
-class AlpacaApiRateLimit(Exception):
-    pass
-
-
-class NoExistSymbol(Exception):
-    pass
+from exceptions import AlpacaApiRateLimit, NoExistSymbol
 
 
 @dataclass
