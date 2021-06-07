@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
 from client_paper_trade import ClientPaperTrade
 from client_db import ClientDB
-from models.data import TimeFrame
+from data_types import TimeFrame
 
 
 class SymbolNotDownloadable(Exception):

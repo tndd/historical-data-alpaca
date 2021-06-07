@@ -4,7 +4,7 @@ import os
 import datetime
 from dataclasses import dataclass
 from client_alpaca import ClientAlpaca
-from models.data import MarketDataType, PriceDataType, TimeFrame
+from data_types import MarketDataType, PriceDataType, TimeFrame
 
 
 @dataclass
