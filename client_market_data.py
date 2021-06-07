@@ -19,6 +19,10 @@ class AlpacaApiRateLimit(Exception):
     pass
 
 
+class NoExistSymbol(Exception):
+    pass
+
+
 @dataclass
 class ClientMarketData(ClientAlpaca):
     _base_url: str = os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
@@ -97,8 +101,7 @@ class ClientMarketData(ClientAlpaca):
     def download_bars(self, symbol: str) -> None:
         self._logger.debug(f'Start download bars "{symbol}"')
         if self._client_pt.is_symbol_exist(symbol) is False:
-            # TODO: Not exist symbol exception
-            raise SymbolNotDownloadable(f'Symbol "{symbol}" is not downloadable.')
+            raise NoExistSymbol(f'Symbol "{symbol}" is not exist.')
         if self._client_pt.is_completed_dl_of_symbol(symbol) is True:
             self._logger.debug(f'Bars data "{symbol} is already downloaded. skip dl.')
             return
