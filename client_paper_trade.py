@@ -109,8 +109,8 @@ class ClientPaperTrade(ClientAlpaca):
     def is_symbol_downloaded(self, symbol: str) -> bool:
         if self._symbol_dl_progress[symbol]['f'] is True:
             self._logger.debug(f"symbol \"{symbol}\" is already downloaded.")
-            return False
-        return True
+            return True
+        return False
 
 
 def main():
