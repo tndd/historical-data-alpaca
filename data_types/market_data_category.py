@@ -1,6 +1,6 @@
 from enum import Enum
 
 
-class MarketDataType(Enum):
+class MarketDataCategory(Enum):
     HIST = 'historical'
     REAL = 'realtime'

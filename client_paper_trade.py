@@ -4,7 +4,7 @@ import os
 import datetime
 from dataclasses import dataclass
 from client_alpaca import ClientAlpaca
-from data_types import MarketDataType, PriceDataType, TimeFrame
+from data_types import MarketDataCategory, PriceDataCategory, TimeFrame
 
 
 @dataclass
@@ -55,8 +55,8 @@ class ClientPaperTrade(ClientAlpaca):
             symbol = asset['symbol']
             symbol_dl_progress[symbol] = {
                 'id': asset['id'],
-                MarketDataType.HIST.value: {
-                    PriceDataType.BAR.value: {
+                MarketDataCategory.HIST.value: {
+                    PriceDataCategory.BAR.value: {
                         TimeFrame.MIN.value: base_status.copy(),
                         TimeFrame.HOUR.value: base_status.copy(),
                         TimeFrame.DAY.value: base_status.copy()
@@ -80,8 +80,8 @@ class ClientPaperTrade(ClientAlpaca):
 
     def get_symbols_progress_todo(
             self,
-            market_dt: MarketDataType = MarketDataType.HIST,
-            price_dt: PriceDataType = PriceDataType.BAR,
+            market_dt: MarketDataCategory = MarketDataCategory.HIST,
+            price_dt: PriceDataCategory = PriceDataCategory.BAR,
             time_frame: TimeFrame = TimeFrame.MIN
     ) -> list:
         return [
@@ -99,8 +99,8 @@ class ClientPaperTrade(ClientAlpaca):
             symbol: str,
             dl_until_time: str,
             message: str = '',
-            market_dt: MarketDataType = MarketDataType.HIST,
-            price_dt: PriceDataType = PriceDataType.BAR,
+            market_dt: MarketDataCategory = MarketDataCategory.HIST,
+            price_dt: PriceDataCategory = PriceDataCategory.BAR,
             time_frame: TimeFrame = TimeFrame.MIN
     ) -> None:
         if symbol in self._symbol_dl_progress:
@@ -139,8 +139,8 @@ class ClientPaperTrade(ClientAlpaca):
     def is_completed_dl_of_symbol(
             self,
             symbol: str,
-            market_dt: MarketDataType = MarketDataType.HIST,
-            price_dt: PriceDataType = PriceDataType.BAR,
+            market_dt: MarketDataCategory = MarketDataCategory.HIST,
+            price_dt: PriceDataCategory = PriceDataCategory.BAR,
             time_frame: TimeFrame = TimeFrame.MIN
     ) -> bool:
         dl_comp_date = (
