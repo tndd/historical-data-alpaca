@@ -27,6 +27,7 @@ class ClientPaperTrade(ClientAlpaca):
 
     def download_assets(self) -> None:
         assets = self.get_assets()
+        os.makedirs(self._dl_destination, exist_ok=True)
         with open(self._assets_path, 'w') as f:
             yaml.dump(assets, f, indent=2)
         self._logger.debug(f"Assets is downloaded in \"{self._assets_path}\"")
