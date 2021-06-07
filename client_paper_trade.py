@@ -9,7 +9,7 @@ from client_alpaca import ClientAlpaca
 @dataclass
 class ClientPaperTrade(ClientAlpaca):
     _assets_name = 'assets.yaml'
-    _symbol_dl_progress_name = 'symbol_dl_progress.yaml'
+    _symbol_dl_progress_name = 'n_symbol_dl_progress.yaml'
     _base_url = os.getenv('ALPACA_ENDPOINT_PAPER_TRADE')
 
     def __post_init__(self) -> None:
@@ -35,14 +35,41 @@ class ClientPaperTrade(ClientAlpaca):
         if not os.path.exists(self._assets_path):
             self._logger.debug('assets data is not exist, it will be downloaded.')
             self.download_assets()
+        self._logger.debug(f'Loading assets data.')
+        time_start = datetime.datetime.now()
         with open(self._assets_path, 'r') as f:
             assets = yaml.safe_load(f)
+        self._logger.debug(f'Loaded assets. time: "{datetime.datetime.now() - time_start}" sec.')
         return assets
 
     def get_active_symbols_from_assets(self) -> list:
         assets = self.load_assets()
         active_assets = list(filter(lambda a: a['status'] == 'active', assets))
         return list(map(lambda a: a['symbol'], active_assets))
+
+    def n_init_symbol_dl_progress(self) -> None:
+        symbol_dl_progress = {}
+        for asset in self.load_assets():
+            if asset['status'] != 'active':
+                continue
+            base_status = {
+                'latest_data_time': '',
+                'message': ''
+            }
+            symbol = asset['symbol']
+            symbol_dl_progress[symbol] = {
+                'id': asset['id'],
+                'historical': {
+                    'bars': {
+                        'min': base_status.copy(),
+                        'hour': base_status.copy(),
+                        'day': base_status.copy()
+                    }
+                }
+            }
+        with open(self._symbol_dl_progress_path, 'w') as f:
+            yaml.dump(symbol_dl_progress, f, indent=2)
+        self._logger.debug(f'Initialized symbol_dl_progress, saved in "{self._symbol_dl_progress_path}"')
 
     def init_symbol_dl_progress(self) -> None:
         symbols = self.get_active_symbols_from_assets()
@@ -114,8 +141,9 @@ class ClientPaperTrade(ClientAlpaca):
 
 
 def main():
+    # TODO: update dl_progress_format, add type min, hour, day
     client = ClientPaperTrade()
-    print(client.get_auth_headers())
+    print(client.n_init_symbol_dl_progress())
 
 
 if __name__ == '__main__':
