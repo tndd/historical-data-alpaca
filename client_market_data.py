@@ -23,6 +23,7 @@ class AlpacaApiRateLimit(Exception):
 class ClientMarketData(ClientAlpaca):
     _base_url: str = os.getenv('ALPACA_ENDPOINT_MARKET_DATA')
     _start_time: str = '2016-01-01'
+    _end_time: str = (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d')
     _time_frame: TimeFrame = TimeFrame.MIN
     _limit: int = 10000
     _client_pt: ClientPaperTrade = ClientPaperTrade()
@@ -42,7 +43,7 @@ class ClientMarketData(ClientAlpaca):
         url = f"{self._base_url}/stocks/{symbol}/bars"
         query = {
             'start': self._start_time,
-            'end': (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d'),
+            'end': self._end_time,
             'timeframe': self._time_frame.value,
             'limit': self._limit
         }
@@ -96,8 +97,9 @@ class ClientMarketData(ClientAlpaca):
     def download_bars(self, symbol: str) -> None:
         self._logger.debug(f'Start download bars "{symbol}"')
         if self._client_pt.is_symbol_exist(symbol) is False:
+            # TODO: Not exist symbol exception
             raise SymbolNotDownloadable(f'Symbol "{symbol}" is not downloadable.')
-        if self._client_pt.is_symbol_downloaded(symbol) is True:
+        if self._client_pt.is_completed_dl_of_symbol(symbol) is True:
             self._logger.debug(f'Bars data "{symbol} is already downloaded. skip dl.')
             return
         # clear incompleteness bars files
@@ -120,7 +122,7 @@ class ClientMarketData(ClientAlpaca):
         # update download progress status
         self._client_pt.update_dl_progress_of_symbol(
             symbol=symbol,
-            is_complete=True
+            dl_until_time=self._end_time
         )
 
     def download_all_symbol_bars(self) -> None:
@@ -135,7 +137,6 @@ class ClientMarketData(ClientAlpaca):
 def main():
     # TODO: implement function download symbols from argument symbol_list.
     client = ClientMarketData()
-    client.download_all_symbol_bars()
 
 
 if __name__ == '__main__':
