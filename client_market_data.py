@@ -1,6 +1,7 @@
 import os
 import requests
 import yaml
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -32,10 +33,12 @@ class ClientMarketData(ClientAlpaca):
     _limit: int = 10000
     _client_pt: ClientPaperTrade = ClientPaperTrade()
     _client_db: ClientDB = ClientDB()
+    _api_rate_limit = 200
 
     def __post_init__(self) -> None:
         self._logger = self._logger.getChild(__name__)
         self.dl_hist_bars_destination = f"{self._dl_destination}/historical/bars"
+        self._api_rate_limit_per_min = (self._api_rate_limit // 59)
 
     def _get_bars_segment(
             self,
@@ -57,9 +60,10 @@ class ClientMarketData(ClientAlpaca):
             headers=self.get_auth_headers(),
             params=query
         )
+        time_elapsed = datetime.now() - time_start
         self._logger.debug((
             f"Request symbol: \"{symbol}\", "
-            f"Time: \"{datetime.now() - time_start}\", "
+            f"Time: \"{time_elapsed}\", "
             f"Status code: \"{r.status_code}\", "
             f"Url: \"{url}\", "
             f"Query: {str(query)}"
@@ -67,6 +71,11 @@ class ClientMarketData(ClientAlpaca):
         # raise exception if exceed alpaca api rate limit 200 per min.
         if r.status_code == 429:
             raise AlpacaApiRateLimit(f'Alpaca api rate limit has been exceeded.')
+        # wait to avoid api limit rate
+        time_too_early = self._api_rate_limit_per_min - time_elapsed.total_seconds()
+        if time_too_early > 0:
+            self._logger.debug(f'Request time is too early, wait "{time_too_early}" sec.')
+            time.sleep(time_too_early)
         return r.json()
 
     def get_dl_bars_destination(self, symbol: str) -> str:
