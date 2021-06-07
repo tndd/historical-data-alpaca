@@ -18,11 +18,11 @@ class RepositoryMarketData:
     _client_md: ClientMarketData = ClientMarketData()
     _client_db: ClientDB = ClientDB()
 
-    def load_bars_lines(self, symbol: str) -> list:
+    def load_bars_lines_from_file(self, symbol: str) -> list:
         bars_dir_path = self._client_md.get_dl_bars_destination(symbol)
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
-        # download bars data if not exist it.
-        if len(bars_paths) == 0:
+        # download bars data if not exist or only head.yaml.
+        if len(bars_paths) <= 1:
             self._logger.debug(f'bars data files "{symbol}" is not exist, it will be downloaded.')
             self._client_md.download_bars(symbol)
         # recount bars data num
@@ -55,7 +55,7 @@ class RepositoryMarketData:
         return bars_lines
 
     def store_bars_to_db(self, symbol: str) -> None:
-        bars_lines = self.load_bars_lines(symbol)
+        bars_lines = self.load_bars_lines_from_file(symbol)
         self._client_db.insert_lines_to_historical_bars_1min(bars_lines)
         self._logger.debug(f'bars "{symbol}" is stored to db.')
 

@@ -67,7 +67,7 @@ class ClientPaperTrade(ClientAlpaca):
             symbol_dl_progress = yaml.safe_load(f)
         return symbol_dl_progress
 
-    def symbols_progress_todo(self) -> list:
+    def get_symbols_progress_todo(self) -> list:
         return [s for s, d in self._symbol_dl_progress.items() if d['f'] is False]
 
     def update_symbol_dl_progress(self) -> None:
