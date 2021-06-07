@@ -106,6 +106,7 @@ class ClientMarketData(ClientAlpaca):
         if self._client_pt.is_symbol_downloaded(symbol) is True:
             self._logger.debug(f'Bars data "{symbol} is already downloaded. skip dl.')
             return
+        # TODO: clear incompleteness bars files of symbol before download new bars files.
         next_page_token = None
         time_start = datetime.now()
         while True:
@@ -128,7 +129,6 @@ class ClientMarketData(ClientAlpaca):
 
 
 def main():
-    # TODO: delete bars files if dl_progress is false.
     # TODO: implement function download symbols from argument symbol_list.
     client = ClientMarketData()
     client.download_all_symbol_bars()
