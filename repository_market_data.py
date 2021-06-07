@@ -21,11 +21,8 @@ class RepositoryMarketData:
     def load_bars_lines_from_file(self, symbol: str) -> list:
         bars_dir_path = self._client_md.get_dl_bars_destination(symbol)
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
-        # download bars data if not exist or only head.yaml.
-        # TODO: judge of exist file should be made by symbol_dl_progress
-        if len(bars_paths) <= 1:
-            self._logger.debug(f'bars data files "{symbol}" is not exist, it will be downloaded.')
-            self._client_md.download_bars(symbol)
+        # if download bars is not completed, it will be downloaded.
+        self._client_md.download_bars(symbol)
         # recount bars data num
         bars_num = len(bars_paths)
         self._logger.debug(f'symbol: "{symbol}", bars data num: "{bars_num}"')
