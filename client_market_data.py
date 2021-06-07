@@ -23,7 +23,7 @@ class AlpacaApiRateLimit(Exception):
 class TimeFrame(Enum):
     MIN = '1Min'
     HOUR = '1Hour'
-    DAY = '1DAY'
+    DAY = '1Day'
 
 
 @dataclass
