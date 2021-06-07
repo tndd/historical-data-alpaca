@@ -87,9 +87,9 @@ class ClientMarketData(ClientAlpaca):
     ) -> str:
         dl_bars_seg_dst = self.get_dl_bars_destination(symbol)
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
-        file_name = 'head' if page_token is None else page_token
+        file_name = f'head_{self._end_time}.yaml' if page_token is None else page_token
         bars_segment = self._get_bars_segment(symbol, page_token)
-        with open(f"{dl_bars_seg_dst}/{file_name}.yaml", 'w') as f:
+        with open(f"{dl_bars_seg_dst}/{file_name}", 'w') as f:
             yaml.dump(bars_segment, f, indent=2)
         self._logger.debug((
             f"Download bars_segment is completed. "
@@ -138,8 +138,8 @@ class ClientMarketData(ClientAlpaca):
 
 
 def main():
-    # TODO: implement function download symbols from argument symbol_list.
     client = ClientMarketData()
+    client.download_bars('VWO')
 
 
 if __name__ == '__main__':
