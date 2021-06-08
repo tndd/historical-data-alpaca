@@ -88,17 +88,17 @@ class ClientMarketData(ClientAlpaca):
         return bars_segment['next_page_token']
 
     def download_bars(self, symbol: str) -> None:
-        self._logger.debug(f'Start download bars "{symbol}"')
+        self._logger.info(f'Start download bars "{symbol}"')
         if self._client_pt.is_symbol_exist(symbol) is False:
             raise NoExistSymbol(f'Symbol "{symbol}" is not exist.')
         if self._client_pt.is_completed_dl_of_symbol(symbol) is True:
-            self._logger.debug(f'Bars data "{symbol} is already downloaded. skip DL.')
+            self._logger.info(f'Bars data "{symbol} is already downloaded. skip DL.')
             return
         # clear incompleteness bars files
         dl_bars_seg_dst = self.get_dl_bars_destination(symbol)
         if os.path.exists(dl_bars_seg_dst):
             shutil.rmtree(dl_bars_seg_dst)
-            self._logger.debug((
+            self._logger.info((
                 f'Removed bars directory because of discovered incompleteness data files. '
                 f'Symbol: "{symbol}", '
                 f'Path: "{dl_bars_seg_dst}"'
@@ -110,7 +110,7 @@ class ClientMarketData(ClientAlpaca):
             next_page_token = self._download_bars_segment(symbol, next_page_token)
             if next_page_token is None:
                 break
-        self._logger.debug(f'Download bars data set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
+        self._logger.info(f'Download bars data set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
         # update download progress status
         self._client_pt.update_dl_progress_of_symbol(
             symbol=symbol,
@@ -119,11 +119,11 @@ class ClientMarketData(ClientAlpaca):
 
     def download_all_symbol_bars(self) -> None:
         dl_symbols = self._client_pt.get_symbols_progress_todo()
-        self._logger.debug(f'Todo download symbols bars. num: {len(dl_symbols)}')
+        self._logger.info(f'Todo download symbols bars. num: {len(dl_symbols)}')
         time_start = datetime.now()
         for symbol in dl_symbols:
             self.download_bars(symbol)
-        self._logger.debug(f'Download all symbol bars is completed. time: "{datetime.now() - time_start}"')
+        self._logger.info(f'Download all symbol bars is completed. time: "{datetime.now() - time_start}"')
 
 
 def main():

@@ -54,7 +54,7 @@ class ClientDB:
         # split lines every 500,000
         chunk = 500000
         lines_len = len(lines)
-        self._logger.debug(f"insert num: {lines_len}")
+        self._logger.info(f"insert num: {lines_len}")
         lines_parts = [lines[i:i+chunk] for i in range(0, lines_len, chunk)]
         query = '''
                 INSERT INTO alpaca_market_db.historical_bars_1min (
@@ -63,7 +63,7 @@ class ClientDB:
                 '''
         for i, l_part in enumerate(lines_parts):
             self._cur.executemany(query, l_part)
-            self._logger.debug(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
+            self._logger.info(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
         self._conn.commit()
 
     def count_symbol_table_historical_bars_1min(self, symbol: str) -> int:
