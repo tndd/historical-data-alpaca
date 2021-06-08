@@ -42,9 +42,11 @@ class ClientPaperTrade(ClientAlpaca):
         with open(self._assets_path, 'r') as f:
             assets = yaml.safe_load(f)
         self._logger.debug(f'Loaded assets. time: "{datetime.datetime.now() - time_start}" sec.')
+        # TODO: store assets to db
         return assets
 
     def init_symbol_dl_progress(self) -> None:
+        # TODO: store dl_progress to db
         symbol_dl_progress = {}
         for asset in self.load_assets():
             if asset['status'] != 'active':
