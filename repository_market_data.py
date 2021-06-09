@@ -36,21 +36,6 @@ class RepositoryMarketData:
         '''
         self._client_db.cur.execute(query)
 
-    def _insert_lines_to_bars_1min(self, lines: list) -> None:
-        # split lines every 500,000 because of memory limit.
-        chunk = 500000
-        lines_len = len(lines)
-        self._logger.info(f"insert num: {lines_len}")
-        lines_parts = [lines[i:i+chunk] for i in range(0, lines_len, chunk)]
-        query = '''
-            INSERT INTO alpaca_market_db.bars_1min (`time`, symbol, `open`, high, low, `close`, volume)
-            VALUES(%s, %s, %s, %s, %s, %s, %s);
-        '''
-        for i, l_part in enumerate(lines_parts):
-            self._client_db.cur.executemany(query, l_part)
-            self._logger.info(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
-        self._client_db.conn.commit()
-
     def _count_symbol_table_bars_1min(self, symbol: str) -> int:
         query = f'''
             SELECT COUNT(*)
@@ -107,8 +92,12 @@ class RepositoryMarketData:
         return bars_lines
 
     def _store_bars_to_db(self, symbol: str) -> None:
+        query = '''
+            INSERT INTO alpaca_market_db.bars_1min (`time`, symbol, `open`, high, low, `close`, volume)
+            VALUES(%s, %s, %s, %s, %s, %s, %s);
+        '''
         bars_lines = self._load_bars_lines_from_files(symbol)
-        self._insert_lines_to_bars_1min(bars_lines)
+        self._client_db.insert_lines(query, bars_lines)
         self._logger.info(f'bars "{symbol}" is stored to db.')
 
     def load_bars_df(self, symbol: str) -> pd.DataFrame:
