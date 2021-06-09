@@ -3,6 +3,7 @@ import pandas as pd
 from dataclasses import dataclass
 from dotenv import load_dotenv
 from logging import getLogger, config, Logger
+from datetime import datetime, timedelta
 from client_db import ClientDB
 from client_paper_trade import ClientPaperTrade
 from data_types import QueryType, PriceDataCategory, TimeFrame
@@ -94,10 +95,17 @@ class RepositoryPaperTrade:
         time_frame = TimeFrame.MIN
         return self.get_df_market_data_dl_progress_active(category, time_frame)
 
+    def get_df_market_data_dl_progress_active_bars_min_update_targets(
+            self,
+            to_date: str = (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d')
+    ) -> pd.DataFrame:
+        condition = f'until.isnull() | until < "{to_date}"'
+        return self.get_df_market_data_dl_progress_active_bars_min().query(condition)
+
 
 def main():
     rp = RepositoryPaperTrade()
-    df = rp.get_df_market_data_dl_progress_active_bars_min()
+    df = rp.get_df_market_data_dl_progress_active_bars_min_update_targets()
     print(df)
 
 
