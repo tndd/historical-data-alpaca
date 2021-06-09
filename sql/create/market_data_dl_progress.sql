@@ -1,4 +1,4 @@
-CREATE TABLE `market_data_dl_progress` (
+CREATE TABLE IF NOT EXISTS `market_data_dl_progress` (
   `category` varchar(8) NOT NULL,
   `time_frame` varchar(8) NOT NULL,
   `until` datetime NOT NULL,

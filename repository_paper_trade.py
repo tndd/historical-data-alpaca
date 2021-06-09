@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from logging import getLogger, config, Logger
 from client_db import ClientDB
 from client_paper_trade import ClientPaperTrade
+from data_types import QueryType
 
 load_dotenv()
 os.makedirs('log', exist_ok=True)
@@ -19,7 +20,7 @@ class RepositoryPaperTrade:
 
     def store_assets_to_db(self) -> None:
         assets = self._client_pt.get_assets()
-        query = self._client_db.load_query_by_name('insert_assets')
+        query = self._client_db.load_query_by_name(QueryType.INSERT, 'insert_assets')
         lines = [
             (
                 a['id'],
@@ -39,12 +40,12 @@ class RepositoryPaperTrade:
         self._client_db.insert_lines(query, lines)
 
     def count_table_assets(self) -> int:
-        query = self._client_db.load_query_by_name('count_table_assets')
+        query = self._client_db.load_query_by_name(QueryType.COUNT, 'assets')
         self._client_db.cur.execute(query)
         return self._client_db.cur.fetchone()[0]
 
     def load_assets_dataframe(self) -> pd.DataFrame:
-        query = self._client_db.load_query_by_name('select_assets')
+        query = self._client_db.load_query_by_name(QueryType.SELECT, 'assets')
         # if not exist assets data in db, download it.
         if self.count_table_assets() == 0:
             self.store_assets_to_db()
