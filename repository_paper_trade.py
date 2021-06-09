@@ -55,7 +55,7 @@ class RepositoryPaperTrade:
 
     def init_market_data_dl_progress(self):
         # extract only active rows
-        asset_ids = self.load_assets_dataframe().query('status == "active"')['id']
+        asset_ids = self.load_assets_dataframe()['id']
         lines = []
         categories = [
             PriceDataCategory.BAR.value,
