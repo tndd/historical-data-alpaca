@@ -104,11 +104,37 @@ class RepositoryPaperTrade:
         df = self.get_df_market_data_dl_progress_active_bars_min().query(condition).set_index('asset_id')
         return df['symbol']
 
+    def update_dl_progress(
+            self,
+            asset_id: str,
+            message: str,
+            time_until: str,
+            category: PriceDataCategory,
+            time_frame: TimeFrame
+    ) -> None:
+        query = self._client_db.load_query_by_name(QueryType.UPDATE, self._tbl_name_dl_progress)
+        param = (time_until, message, asset_id, category.value, time_frame.value)
+        self._client_db.cur.execute(query, param)
+        self._client_db.conn.commit()
+
+    def update_dl_progress_bar_min(
+            self,
+            asset_id: str,
+            message: str,
+            time_until: str
+    ) -> None:
+        category = PriceDataCategory.BAR
+        time_frame = TimeFrame.MIN
+        self.update_dl_progress(asset_id, message, time_until, category, time_frame)
+
 
 def main():
     rp = RepositoryPaperTrade()
-    df = rp.get_symbols_download_todo()
-    print(df)
+    rp.update_dl_progress_bar_min(
+        asset_id='0009164a-afa2-4b9c-aae6-571bbf12a2a9',
+        message='TEST',
+        time_until='2021-06-10'
+    )
 
 
 if __name__ == '__main__':
