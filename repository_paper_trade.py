@@ -76,10 +76,29 @@ class RepositoryPaperTrade:
         query = self._client_db.load_query_by_name(QueryType.INSERT, self._tbl_name_dl_progress)
         self._client_db.insert_lines(query, lines)
 
+    def get_df_market_data_dl_progress_active(
+            self,
+            category: PriceDataCategory,
+            time_frame: TimeFrame
+    ) -> pd.DataFrame:
+        query = self._client_db.load_query_by_name(QueryType.SELECT, self._tbl_name_dl_progress)
+        df = pd.read_sql(query, self._client_db.conn)
+        condition = 'category=="{ct}" & time_frame=="{tf}" & status=="active"'.format(
+            ct=category.value,
+            tf=time_frame.value
+        )
+        return df.query(condition)
+
+    def get_df_market_data_dl_progress_active_bars_min(self) -> pd.DataFrame:
+        category = PriceDataCategory.BAR
+        time_frame = TimeFrame.MIN
+        return self.get_df_market_data_dl_progress_active(category, time_frame)
+
 
 def main():
     rp = RepositoryPaperTrade()
-    rp.init_market_data_dl_progress()
+    df = rp.get_df_market_data_dl_progress_active_bars_min()
+    print(df)
 
 
 if __name__ == '__main__':
