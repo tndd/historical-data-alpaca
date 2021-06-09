@@ -95,17 +95,19 @@ class RepositoryPaperTrade:
         time_frame = TimeFrame.MIN
         return self.get_df_market_data_dl_progress_active(category, time_frame)
 
-    def get_df_market_data_dl_progress_active_bars_min_update_targets(
+    def get_symbols_download_todo(
             self,
             to_date: str = (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d')
-    ) -> pd.DataFrame:
+    ) -> pd.Series:
+        # key: asset_id, value: symbol
         condition = f'until.isnull() | until < "{to_date}"'
-        return self.get_df_market_data_dl_progress_active_bars_min().query(condition)
+        df = self.get_df_market_data_dl_progress_active_bars_min().query(condition).set_index('asset_id')
+        return df['symbol']
 
 
 def main():
     rp = RepositoryPaperTrade()
-    df = rp.get_df_market_data_dl_progress_active_bars_min_update_targets()
+    df = rp.get_symbols_download_todo()
     print(df)
 
 
