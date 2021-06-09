@@ -34,6 +34,17 @@ class ClientDB:
         self.cur.execute(f"CREATE DATABASE IF NOT EXISTS {self._name};")
         self.cur.execute(f"USE {self._name};")
 
+    def insert_lines(self, query: str, lines: list) -> None:
+        # split lines every 500,000 because of restriction memory limit.
+        chunk = 500000
+        lines_len = len(lines)
+        self._logger.info(f"insert num: {lines_len}")
+        lines_parts = [lines[i:i + chunk] for i in range(0, lines_len, chunk)]
+        for i, l_part in enumerate(lines_parts):
+            self.cur.executemany(query, l_part)
+            self._logger.info(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
+        self.conn.commit()
+
 
 def main():
     client = ClientDB()

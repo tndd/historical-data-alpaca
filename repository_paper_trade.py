@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 from logging import getLogger, config, Logger
 from client_db import ClientDB
+from client_paper_trade import ClientPaperTrade
 
 load_dotenv()
 os.makedirs('log', exist_ok=True)
@@ -14,6 +15,7 @@ config.fileConfig('logging.conf')
 class RepositoryPaperTrade:
     _logger: Logger = getLogger(__name__)
     _client_db: ClientDB = ClientDB()
+    _client_pt: ClientPaperTrade = ClientPaperTrade()
 
     def __post_init__(self) -> None:
         self._create_table_assets()
@@ -37,9 +39,45 @@ class RepositoryPaperTrade:
         '''
         self._client_db.cur.execute(query)
 
+    def store_assets_to_db(self) -> None:
+        assets = self._client_pt.get_assets()
+        query = '''
+            INSERT INTO alpaca_market_db.assets (
+                id,
+                class,
+                easy_to_borrow,
+                exchange,
+                fractionable,
+                marginable,
+                name,
+                shortable,
+                status,
+                symbol,
+                tradable
+            ) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
+        '''
+        lines = [
+            (
+                a['id'],
+                a['class'],
+                a['easy_to_borrow'],
+                a['exchange'],
+                a['fractionable'],
+                a['marginable'],
+                a['name'],
+                a['shortable'],
+                a['status'],
+                a['symbol'],
+                a['tradable']
+            )
+            for a in assets
+        ]
+        self._client_db.insert_lines(query, lines)
+
 
 def main():
     rp = RepositoryPaperTrade()
+    rp.store_assets_to_db()
 
 
 if __name__ == '__main__':
