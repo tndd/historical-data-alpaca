@@ -54,14 +54,14 @@ class RepositoryMarketData:
 
     def store_bars_to_db(self, symbol: str) -> None:
         bars_lines = self.load_bars_lines_from_file(symbol)
-        self._client_db.insert_lines_to_historical_bars_1min(bars_lines)
+        self._client_db.insert_lines_to_bars_1min(bars_lines)
         self._logger.info(f'bars "{symbol}" is stored to db.')
 
     def load_bars_df(self, symbol: str) -> pd.DataFrame:
-        if self._client_db.count_symbol_table_historical_bars_1min(symbol) == 0:
+        if self._client_db.count_symbol_table_bars_1min(symbol) == 0:
             self._logger.info(f'bars "{symbol}" is not exist in db, it will be stored.')
             self.store_bars_to_db(symbol)
-        return self._client_db.load_table_historical_bars_1min_dataframe(symbol)
+        return self._client_db.load_table_bars_1min_dataframe(symbol)
 
 
 def main():
