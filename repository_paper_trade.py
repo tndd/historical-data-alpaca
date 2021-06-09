@@ -74,10 +74,40 @@ class RepositoryPaperTrade:
         ]
         self._client_db.insert_lines(query, lines)
 
+    def count_table_assets(self) -> int:
+        query = '''
+            SELECT COUNT(*)
+            FROM assets;
+        '''
+        self._client_db.cur.execute(query)
+        return self._client_db.cur.fetchone()[0]
+
+    def load_assets_dataframe(self) -> pd.DataFrame:
+        query = '''
+            SELECT 
+                id,
+                class,
+                easy_to_borrow,
+                exchange,
+                fractionable,
+                marginable,
+                name,
+                shortable,
+                status,
+                symbol,
+                tradable
+            FROM alpaca_market_db.assets;
+        '''
+        # if not exist assets data in db, download it.
+        if self.count_table_assets() == 0:
+            self.store_assets_to_db()
+        return pd.read_sql(query, self._client_db.conn)
+
 
 def main():
     rp = RepositoryPaperTrade()
-    rp.store_assets_to_db()
+    df = rp.load_assets_dataframe()
+    print(df)
 
 
 if __name__ == '__main__':
