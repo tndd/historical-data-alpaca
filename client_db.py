@@ -24,6 +24,7 @@ class ClientDB:
         self.conn = self.create_connection()
         self.cur = self.conn.cursor()
         self.init_db()
+        self.create_tables()
 
     def get_sql_file_path(self, file_name: str) -> str:
         file_path = f'{Path(__file__).parent}/{self._sql_dir_path}/{file_name}.sql'
@@ -46,6 +47,13 @@ class ClientDB:
     def init_db(self) -> None:
         self.cur.execute(f"CREATE DATABASE IF NOT EXISTS {self._name};")
         self.cur.execute(f"USE {self._name};")
+
+    def create_tables(self) -> None:
+        q_create_assets = self.load_query_by_name('create_table_assets')
+        q_create_market_data_dl_progress = self.load_query_by_name('create_table_market_data_dl_progress')
+        self.cur.execute(q_create_assets)
+        self.cur.execute(q_create_market_data_dl_progress)
+        self.conn.commit()
 
     def insert_lines(self, query: str, lines: list) -> None:
         # split lines every 500,000 because of restriction memory limit.

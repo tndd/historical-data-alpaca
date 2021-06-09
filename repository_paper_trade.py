@@ -17,13 +17,6 @@ class RepositoryPaperTrade:
     _client_db: ClientDB = ClientDB()
     _client_pt: ClientPaperTrade = ClientPaperTrade()
 
-    def __post_init__(self) -> None:
-        self._create_table_assets()
-
-    def _create_table_assets(self) -> None:
-        query = self._client_db.load_query_by_name('create_table_assets')
-        self._client_db.cur.execute(query)
-
     def store_assets_to_db(self) -> None:
         assets = self._client_pt.get_assets()
         query = self._client_db.load_query_by_name('insert_assets')
