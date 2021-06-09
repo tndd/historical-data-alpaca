@@ -1,9 +1,10 @@
 import os
 import mysql.connector
-import pandas as pd
 from dataclasses import dataclass
 from dotenv import load_dotenv
 from logging import getLogger, config, Logger
+from pathlib import Path
+from exceptions import NotExistSqlFile
 
 load_dotenv()
 os.makedirs('log', exist_ok=True)
@@ -12,16 +13,28 @@ config.fileConfig('logging.conf')
 
 @dataclass
 class ClientDB:
+    _logger: Logger = getLogger(__name__)
     _user: str = os.getenv('DB_USER')
     _passwd: str = os.getenv('DB_PASSWORD')
     _host: str = os.getenv('DB_HOST')
     _name: str = os.getenv('DB_NAME')
-    _logger: Logger = getLogger(__name__)
+    _sql_dir_path: str = './sql'
 
     def __post_init__(self) -> None:
         self.conn = self.create_connection()
         self.cur = self.conn.cursor()
         self.init_db()
+
+    def get_sql_file_path(self, file_name: str) -> str:
+        file_path = f'{Path(__file__).parent}/{self._sql_dir_path}/{file_name}.sql'
+        if not os.path.exists(file_path):
+            raise NotExistSqlFile(f'Not exist sql file. name: "{file_name}".sql')
+        return file_path
+
+    def load_query_by_name(self, file_name: str) -> str:
+        with open(self.get_sql_file_path(file_name), 'r') as f:
+            q = f.read()
+        return q
 
     def create_connection(self) -> mysql.connector.MySQLConnection:
         return mysql.connector.connect(
@@ -48,7 +61,7 @@ class ClientDB:
 
 def main():
     client = ClientDB()
-    print(client)
+    print(client.load_query_by_name('create_table_assets'))
 
 
 if __name__ == '__main__':

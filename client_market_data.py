@@ -9,7 +9,7 @@ from client_alpaca import ClientAlpaca
 from client_paper_trade import ClientPaperTrade
 from client_db import ClientDB
 from data_types import TimeFrame
-from exceptions import AlpacaApiRateLimit, NoExistSymbol
+from exceptions import AlpacaApiRateLimit, NotExistSymbol
 
 
 @dataclass
@@ -90,7 +90,7 @@ class ClientMarketData(ClientAlpaca):
     def download_bars(self, symbol: str) -> None:
         self._logger.info(f'Start download bars "{symbol}"')
         if self._client_pt.is_symbol_exist(symbol) is False:
-            raise NoExistSymbol(f'Symbol "{symbol}" is not exist.')
+            raise NotExistSymbol(f'Symbol "{symbol}" is not exist.')
         if self._client_pt.is_completed_dl_of_symbol(symbol) is True:
             self._logger.info(f'Bars data "{symbol} is already downloaded. skip DL.')
             return

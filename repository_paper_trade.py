@@ -21,41 +21,12 @@ class RepositoryPaperTrade:
         self._create_table_assets()
 
     def _create_table_assets(self) -> None:
-        query = '''
-            CREATE TABLE IF NOT EXISTS `assets` (
-                `id` char(36) NOT NULL,
-                `class` varchar(16) NOT NULL,
-                `easy_to_borrow` tinyint(1) NOT NULL,
-                `exchange` varchar(16) NOT NULL,
-                `fractionable` tinyint(1) NOT NULL,
-                `marginable` tinyint(1) NOT NULL,
-                `name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-                `shortable` tinyint(1) NOT NULL,
-                `status` varchar(16) NOT NULL,
-                `symbol` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-                `tradable` tinyint(1) NOT NULL,
-                PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-        '''
+        query = self._client_db.load_query_by_name('create_table_assets')
         self._client_db.cur.execute(query)
 
     def store_assets_to_db(self) -> None:
         assets = self._client_pt.get_assets()
-        query = '''
-            INSERT INTO alpaca_market_db.assets (
-                id,
-                class,
-                easy_to_borrow,
-                exchange,
-                fractionable,
-                marginable,
-                name,
-                shortable,
-                status,
-                symbol,
-                tradable
-            ) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
-        '''
+        query = self._client_db.load_query_by_name('insert_assets')
         lines = [
             (
                 a['id'],
@@ -75,29 +46,12 @@ class RepositoryPaperTrade:
         self._client_db.insert_lines(query, lines)
 
     def count_table_assets(self) -> int:
-        query = '''
-            SELECT COUNT(*)
-            FROM assets;
-        '''
+        query = self._client_db.load_query_by_name('count_table_assets')
         self._client_db.cur.execute(query)
         return self._client_db.cur.fetchone()[0]
 
     def load_assets_dataframe(self) -> pd.DataFrame:
-        query = '''
-            SELECT 
-                id,
-                class,
-                easy_to_borrow,
-                exchange,
-                fractionable,
-                marginable,
-                name,
-                shortable,
-                status,
-                symbol,
-                tradable
-            FROM alpaca_market_db.assets;
-        '''
+        query = self._client_db.load_query_by_name('select_assets')
         # if not exist assets data in db, download it.
         if self.count_table_assets() == 0:
             self.store_assets_to_db()
