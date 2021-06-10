@@ -116,6 +116,14 @@ class RepositoryPaperTrade:
         param = (time_until, message, asset_id, category.value, time_frame.value)
         self._client_db.cur.execute(query, param)
         self._client_db.conn.commit()
+        self._logger.debug((
+            f'Updated dl_progress. '
+            f'Category: {category.value}, '
+            f'Time frame: {time_frame.value}, '
+            f'Asset id: {asset_id}, '
+            f'Time until: {time_until}, '
+            f'Message: {message}'
+        ))
 
     def is_exist_symbol(self, symbol: str) -> bool:
         df = self.get_df_market_data_dl_progress_active(
