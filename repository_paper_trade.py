@@ -23,6 +23,7 @@ class RepositoryPaperTrade:
 
     def __post_init__(self) -> None:
         self.create_tables()
+        self._init_market_data_dl_progress()
 
     def create_tables(self) -> None:
         q_create_assets = self._client_db.load_query_by_name(QueryType.CREATE, self._tbl_name_assets)
@@ -57,7 +58,7 @@ class RepositoryPaperTrade:
         self._client_db.cur.execute(query)
         return self._client_db.cur.fetchone()[0]
 
-    def count_market_data_dl_progress(self) -> int:
+    def _count_market_data_dl_progress(self) -> int:
         query = self._client_db.load_query_by_name(QueryType.COUNT, self._tbl_name_dl_progress)
         self._client_db.cur.execute(query)
         return self._client_db.cur.fetchone()[0]
@@ -70,6 +71,9 @@ class RepositoryPaperTrade:
         return pd.read_sql(query, self._client_db.conn)
 
     def _init_market_data_dl_progress(self) -> None:
+        if self._count_market_data_dl_progress() != 0:
+            self._logger.info(f'Table "{self._tbl_name_dl_progress}" is already initialized.')
+            return
         asset_ids = self._load_assets_dataframe()['id']
         lines = []
         categories = [
@@ -90,6 +94,7 @@ class RepositoryPaperTrade:
                     lines.append((category, time_frame, default_until, default_message, asset_id))
         query = self._client_db.load_query_by_name(QueryType.INSERT, self._tbl_name_dl_progress)
         self._client_db.insert_lines(query, lines)
+        self._logger.info(f'Initialize table "{self._tbl_name_dl_progress}" is completed.')
 
     def _get_df_market_data_dl_progress_active(
             self,
@@ -130,7 +135,7 @@ class RepositoryPaperTrade:
         param = (time_until, message, asset_id, category.value, time_frame.value)
         self._client_db.cur.execute(query, param)
         self._client_db.conn.commit()
-        self._logger.debug((
+        self._logger.info((
             f'Updated dl_progress. '
             f'Category: {category.value}, '
             f'Time frame: {time_frame.value}, '
@@ -142,7 +147,6 @@ class RepositoryPaperTrade:
 
 def main():
     rp = RepositoryPaperTrade()
-    print(rp.count_market_data_dl_progress())
 
 
 if __name__ == '__main__':
