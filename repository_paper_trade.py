@@ -102,12 +102,11 @@ class RepositoryPaperTrade:
             time_frame: TimeFrame
     ) -> pd.DataFrame:
         query = self._client_db.load_query_by_name(QueryType.SELECT, self._tbl_name_dl_progress)
-        df = pd.read_sql(query, self._client_db.conn)
-        condition = 'category=="{ct}" & time_frame=="{tf}" & status=="active"'.format(
-            ct=category.value,
-            tf=time_frame.value
+        return pd.read_sql(
+            query,
+            self._client_db.conn,
+            params=(category.value, time_frame.value)
         )
-        return df.query(condition)
 
     def get_symbols_market_data_download_todo(
             self,
