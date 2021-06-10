@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 from logging import getLogger, config, Logger
 from datetime import datetime, timedelta
+from typing import Optional
 from client_db import ClientDB
 from client_paper_trade import ClientPaperTrade
 from data_types import QueryType, PriceDataCategory, TimeFrame
@@ -112,24 +113,28 @@ class RepositoryPaperTrade:
             self,
             category: PriceDataCategory,
             time_frame: TimeFrame,
-            to_date: str = (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d')
-    ) -> pd.Series:
+            time_until: str = (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d')
+    ) -> list:
         # key: asset_id, value: symbol
-        condition = f'until.isnull() | until < "{to_date}"'
+        condition = f'until.isnull() | until < "{time_until}"'
         df = self._get_df_market_data_dl_progress_active(
             category=category,
             time_frame=time_frame
         ).query(condition).set_index('asset_id')
-        return df['symbol']
+        return df['symbol'].values
 
     def update_market_data_dl_progress(
             self,
             category: PriceDataCategory,
             time_frame: TimeFrame,
-            asset_id: str,
-            message: str,
+            symbol: str,
+            message: Optional[str],
             time_until: str
     ) -> None:
+        asset_id = self._get_df_market_data_dl_progress_active(
+            category,
+            time_frame
+        ).query(f'symbol == "{symbol}"').iat[0, 0]
         query = self._client_db.load_query_by_name(QueryType.UPDATE, self._tbl_name_dl_progress)
         param = (time_until, message, asset_id, category.value, time_frame.value)
         self._client_db.cur.execute(query, param)
@@ -155,12 +160,14 @@ class RepositoryPaperTrade:
 
 def main():
     rp = RepositoryPaperTrade()
-    df = rp.get_latest_dl_date_of_symbol(
+    # sr = rp._get_df_market_data_dl_progress_active(
+    #     category=PriceDataCategory.BAR,
+    #     time_frame=TimeFrame.MIN,
+    # ).set_index('asset_id')['symbol']
+    print(rp.get_symbols_market_data_download_todo(
         category=PriceDataCategory.BAR,
-        time_frame=TimeFrame.MIN,
-        symbol='CZR'
-    )
-    print(df)
+        time_frame=TimeFrame.MIN
+    ))
 
 
 if __name__ == '__main__':
