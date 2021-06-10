@@ -125,19 +125,9 @@ class RepositoryPaperTrade:
             f'Message: {message}'
         ))
 
-    def is_exist_symbol(self, symbol: str) -> bool:
-        df = self.get_df_market_data_dl_progress_active(
-            category=PriceDataCategory.BAR,
-            time_frame=TimeFrame.MIN
-        )
-        if df['symbol'].isin([symbol]).sum() >= 1:
-            return True
-        return False
-
 
 def main():
     rp = RepositoryPaperTrade()
-    print(rp.is_exist_symbol('SPY'))
 
 
 if __name__ == '__main__':
