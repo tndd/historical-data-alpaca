@@ -144,9 +144,24 @@ class RepositoryPaperTrade:
             f'Message: {message}'
         ))
 
+    def get_latest_dl_date_of_symbol(
+            self,
+            category: PriceDataCategory,
+            time_frame: TimeFrame,
+            symbol: str
+    ) -> str:
+        df = self._get_df_market_data_dl_progress_active(category, time_frame).set_index('symbol')
+        return df.at[symbol, 'until']
+
 
 def main():
     rp = RepositoryPaperTrade()
+    df = rp.get_latest_dl_date_of_symbol(
+        category=PriceDataCategory.BAR,
+        time_frame=TimeFrame.MIN,
+        symbol='CZR'
+    )
+    print(df)
 
 
 if __name__ == '__main__':
