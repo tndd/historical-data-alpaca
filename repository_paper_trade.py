@@ -90,27 +90,27 @@ class RepositoryPaperTrade:
         )
         return df.query(condition)
 
-    def get_df_market_data_dl_progress_active_bars_min(self) -> pd.DataFrame:
-        category = PriceDataCategory.BAR
-        time_frame = TimeFrame.MIN
-        return self.get_df_market_data_dl_progress_active(category, time_frame)
-
     def get_symbols_market_data_download_todo(
             self,
+            category: PriceDataCategory,
+            time_frame: TimeFrame,
             to_date: str = (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d')
     ) -> pd.Series:
         # key: asset_id, value: symbol
         condition = f'until.isnull() | until < "{to_date}"'
-        df = self.get_df_market_data_dl_progress_active_bars_min().query(condition).set_index('asset_id')
+        df = self.get_df_market_data_dl_progress_active(
+            category=category,
+            time_frame=time_frame
+        ).query(condition).set_index('asset_id')
         return df['symbol']
 
     def update_market_data_dl_progress(
             self,
+            category: PriceDataCategory,
+            time_frame: TimeFrame,
             asset_id: str,
             message: str,
-            time_until: str,
-            category: PriceDataCategory,
-            time_frame: TimeFrame
+            time_until: str
     ) -> None:
         query = self._client_db.load_query_by_name(QueryType.UPDATE, self._tbl_name_dl_progress)
         param = (time_until, message, asset_id, category.value, time_frame.value)
@@ -130,7 +130,9 @@ class RepositoryPaperTrade:
 
 def main():
     rp = RepositoryPaperTrade()
-    rp.update_market_data_dl_progress_bar_min(
+    rp.update_market_data_dl_progress(
+        category=PriceDataCategory.BAR,
+        time_frame=TimeFrame.MIN,
         asset_id='0009164a-afa2-4b9c-aae6-571bbf12a2a9',
         message='TEST',
         time_until='2021-06-10'
