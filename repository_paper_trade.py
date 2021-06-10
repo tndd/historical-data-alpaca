@@ -117,26 +117,19 @@ class RepositoryPaperTrade:
         self._client_db.cur.execute(query, param)
         self._client_db.conn.commit()
 
-    def update_market_data_dl_progress_bar_min(
-            self,
-            asset_id: str,
-            message: str,
-            time_until: str
-    ) -> None:
-        category = PriceDataCategory.BAR
-        time_frame = TimeFrame.MIN
-        self.update_market_data_dl_progress(asset_id, message, time_until, category, time_frame)
+    def is_exist_symbol(self, symbol: str) -> bool:
+        df = self.get_df_market_data_dl_progress_active(
+            category=PriceDataCategory.BAR,
+            time_frame=TimeFrame.MIN
+        )
+        if df['symbol'].isin([symbol]).sum() >= 1:
+            return True
+        return False
 
 
 def main():
     rp = RepositoryPaperTrade()
-    rp.update_market_data_dl_progress(
-        category=PriceDataCategory.BAR,
-        time_frame=TimeFrame.MIN,
-        asset_id='0009164a-afa2-4b9c-aae6-571bbf12a2a9',
-        message='TEST',
-        time_until='2021-06-10'
-    )
+    print(rp.is_exist_symbol('SPY'))
 
 
 if __name__ == '__main__':
