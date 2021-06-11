@@ -154,6 +154,11 @@ class RepositoryPaperTrade:
             time_frame: TimeFrame,
             symbol: str
     ) -> Optional[str]:
+        """
+        explain:
+        The start and end dates of the specified download period for the alpaca api are included.
+        So when you start a new download, you need to specify the day after the download date.
+        """
         df = self._get_df_market_data_dl_progress_active(category, time_frame).set_index('symbol')
         date = df.at[symbol, 'until']
         if date == 'NaT':
