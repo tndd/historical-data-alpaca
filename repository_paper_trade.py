@@ -28,7 +28,10 @@ class RepositoryPaperTrade:
 
     def create_tables(self) -> None:
         q_create_assets = self._client_db.load_query_by_name(QueryType.CREATE, self._tbl_name_assets)
-        q_create_market_data_dl_progress = self._client_db.load_query_by_name(QueryType.CREATE, self._tbl_name_dl_progress)
+        q_create_market_data_dl_progress = self._client_db.load_query_by_name(
+            QueryType.CREATE,
+            self._tbl_name_dl_progress
+        )
         self._client_db.cur.execute(q_create_assets)
         self._client_db.cur.execute(q_create_market_data_dl_progress)
         self._client_db.conn.commit()
