@@ -95,7 +95,7 @@ class RepositoryPaperTrade:
                     lines.append((category, time_frame, default_until, default_message, asset_id))
         query = self._client_db.load_query_by_name(QueryType.INSERT, self._tbl_name_dl_progress)
         self._client_db.insert_lines(query, lines)
-        self._logger.info(f'Initialize table "{self._tbl_name_dl_progress}" is completed.')
+        self._logger.debug(f'Initialize table "{self._tbl_name_dl_progress}" is completed.')
 
     def _get_df_market_data_dl_progress_active(
             self,
@@ -139,7 +139,7 @@ class RepositoryPaperTrade:
         param = (time_until, message, asset_id, category.value, time_frame.value)
         self._client_db.cur.execute(query, param)
         self._client_db.conn.commit()
-        self._logger.info((
+        self._logger.debug((
             f'Updated dl_progress. '
             f'Category: {category.value}, '
             f'Time frame: {time_frame.value}, '

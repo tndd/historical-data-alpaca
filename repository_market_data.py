@@ -44,10 +44,10 @@ class RepositoryMarketData:
 
     def _load_bars_lines_from_files(self, symbol: str) -> list:
         # TODO: delete maybe. because tmp file for saving is not necessary.
-        bars_dir_path = self._client_md.get_dl_bars_destination(symbol)
+        bars_dir_path = self._client_md.get_dest_dl_ctg_symbol_timeframe(symbol)
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
         # if download bars is not completed, it will be downloaded automatically.
-        self._client_md.download_bars(symbol)
+        self._client_md.download_price_data(symbol)
         # recount bars data num
         bars_num = len(bars_paths)
         self._logger.info(f'symbol: "{symbol}", bars data num: "{bars_num}"')
