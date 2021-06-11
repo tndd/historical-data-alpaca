@@ -2,6 +2,7 @@ import os
 import requests
 import time
 import yaml
+from glob import glob
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
@@ -73,7 +74,7 @@ class ClientMarketData(ClientAlpaca):
     def _get_dest_dl_ctg_symbol_timeframe(self, symbol: str) -> str:
         return f'{self._dest_dl_category}/{symbol}/{self._time_frame.value}'
 
-    def download_price_data(self, symbol: str) -> None:
+    def _download_price_data(self, symbol: str) -> None:
         # get latest date of symbol for download
         dl_date_start = self._repository_pt.get_date_should_download(
             category=self._category,
@@ -129,6 +130,22 @@ class ClientMarketData(ClientAlpaca):
             time_until=self._end_time
         )
 
+    def load_price_data(self, symbol: str) -> list:
+        # preload data in files
+        self._download_price_data(symbol)
+        price_data_paths = glob(f'{self._get_dest_dl_ctg_symbol_timeframe(symbol)}/*.yaml')
+        prices_len = len(price_data_paths)
+        start_time = datetime.now()
+        prices_data = []
+        for i, path in enumerate(price_data_paths):
+            with open(path, 'r') as f:
+                d = yaml.safe_load(f)
+                price_data_paths.append(d)
+            self._logger.debug(f'Loading "{symbol}": {i + 1}/{prices_len}')
+        self._logger.debug(f'Complete Loading "{symbol}". time: {datetime.now() - start_time}s.')
+        return prices_data
+
+
     def download_bars_all_symbols(self) -> None:
         # TODO: this func should be moved to repository
         symbols_dl_todo = self._repository_pt.get_symbols_market_data_download_todo(
@@ -140,7 +157,7 @@ class ClientMarketData(ClientAlpaca):
         self._logger.info(f'Num of download bars: {download_num}')
         time_start = datetime.now()
         for i, symbol in enumerate(symbols_dl_todo):
-            self.download_price_data(symbol)
+            self._download_price_data(symbol)
             self._logger.info(f'Download progress: {i+1} / {download_num}')
         self._logger.info(f'Download all symbol bars is completed. time: "{datetime.now() - time_start}s"')
 
@@ -149,7 +166,8 @@ def main():
     client = ClientMarketData(
         _end_time='2021-06-03'
     )
-    client.download_price_data('BEST')
+    a = client.load_price_data('BEST')
+    print(a)
 
 
 if __name__ == '__main__':

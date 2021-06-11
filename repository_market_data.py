@@ -47,7 +47,7 @@ class RepositoryMarketData:
         bars_dir_path = self._client_md.get_dest_dl_ctg_symbol_timeframe(symbol)
         bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
         # if download bars is not completed, it will be downloaded automatically.
-        self._client_md.download_price_data(symbol)
+        self._client_md._download_price_data(symbol)
         # recount bars data num
         bars_num = len(bars_paths)
         self._logger.info(f'symbol: "{symbol}", bars data num: "{bars_num}"')
