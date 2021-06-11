@@ -3,7 +3,6 @@ import pandas as pd
 from dataclasses import dataclass
 from dotenv import load_dotenv
 from logging import getLogger, config, Logger
-from datetime import datetime, timedelta
 from typing import Optional
 from client_db import ClientDB
 from client_paper_trade import ClientPaperTrade
@@ -116,7 +115,7 @@ class RepositoryPaperTrade:
             self,
             category: PriceDataCategory,
             time_frame: TimeFrame,
-            time_until: str = (datetime.utcnow() - timedelta(days=2)).strftime('%Y-%m-%d')
+            time_until: str
     ) -> list:
         # key: asset_id, value: symbol
         condition = f'until.isnull() | until < "{time_until}"'

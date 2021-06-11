@@ -2,6 +2,7 @@ import os
 import requests
 import time
 import yaml
+import shutil
 from glob import glob
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -106,20 +107,33 @@ class ClientMarketData(ClientAlpaca):
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
         # download bars of symbol
         next_page_token = None
-        while True:
-            bars_seg = self._request_price_data_segment(
-                symbol=symbol,
-                dl_start_time=dl_date_start,
-                page_token=next_page_token
-            )
-            # save bars_seg data in file
-            title = f'head_{self._end_time}' if next_page_token is None else next_page_token
-            with open(f'{dl_bars_seg_dst}/{title}.yaml', 'w') as f:
-                yaml.dump(bars_seg, f, indent=2)
-            # reset next token for download
-            if bars_seg['next_page_token'] is None:
-                break
-            next_page_token = bars_seg['next_page_token']
+        try:
+            while True:
+                bars_seg = self._request_price_data_segment(
+                    symbol=symbol,
+                    dl_start_time=dl_date_start,
+                    page_token=next_page_token
+                )
+                # save bars_seg data in file
+                title = f'head_{self._end_time}' if next_page_token is None else next_page_token
+                with open(f'{dl_bars_seg_dst}/{title}.yaml', 'w') as f:
+                    yaml.dump(bars_seg, f, indent=2)
+                # reset next token for download
+                if bars_seg['next_page_token'] is None:
+                    break
+                next_page_token = bars_seg['next_page_token']
+        except Exception as e:
+            shutil.rmtree(dl_bars_seg_dst)
+            self._logger.exception(e)
+            self._logger.warning((
+                f'Error occurred while downloading price data. '
+                f'Removed incompleteness data files. '
+                f'Symbol: "{symbol}", '
+                f'Category: {self._category}, '
+                f'Time frame: {self._time_frame}, '
+                f'Path: "{dl_bars_seg_dst}"'
+            ))
+            return
         self._logger.debug(f'Request bars set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
         # update download progress status
         self._repository_pt.update_market_data_dl_progress(
@@ -145,9 +159,7 @@ class ClientMarketData(ClientAlpaca):
         self._logger.debug(f'Complete Loading "{symbol}". time: {datetime.now() - start_time}s.')
         return prices_data
 
-
-    def download_bars_all_symbols(self) -> None:
-        # TODO: this func should be moved to repository
+    def download_price_data_all(self) -> None:
         symbols_dl_todo = self._repository_pt.get_symbols_market_data_download_todo(
             category=self._category,
             time_frame=self._time_frame,
@@ -159,7 +171,12 @@ class ClientMarketData(ClientAlpaca):
         for i, symbol in enumerate(symbols_dl_todo):
             self._download_price_data(symbol)
             self._logger.info(f'Download progress: {i+1} / {download_num}')
-        self._logger.info(f'Download all symbol bars is completed. time: "{datetime.now() - time_start}s"')
+        self._logger.info((
+            f'Download all price data is completed. '
+            f'Category: {self._category.value}, '
+            f'Time frame: {self._time_frame.value}, '
+            f'Time: "{datetime.now() - time_start}s"'
+        ))
 
 
 def main():
