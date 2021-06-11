@@ -75,7 +75,7 @@ class ClientMarketData(ClientAlpaca):
 
     def download_price_data(self, symbol: str) -> None:
         # get latest date of symbol for download
-        dl_date_start = self._repository_pt.get_latest_dl_date_of_symbol(
+        dl_date_start = self._repository_pt.get_date_should_download(
             category=self._category,
             time_frame=self._time_frame,
             symbol=symbol

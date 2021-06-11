@@ -148,17 +148,17 @@ class RepositoryPaperTrade:
             f'Message: {message}'
         ))
 
-    def get_latest_dl_date_of_symbol(
+    def get_date_should_download(
             self,
             category: PriceDataCategory,
             time_frame: TimeFrame,
             symbol: str
     ) -> Optional[str]:
         df = self._get_df_market_data_dl_progress_active(category, time_frame).set_index('symbol')
-        date = str(df.at[symbol, 'until'])
+        date = df.at[symbol, 'until']
         if date == 'NaT':
             return None
-        return date
+        return str(date + pd.tseries.offsets.Day())
 
 
 def main():
@@ -167,10 +167,10 @@ def main():
     #     category=PriceDataCategory.BAR,
     #     time_frame=TimeFrame.MIN,
     # ).set_index('asset_id')['symbol']
-    a = rp.get_latest_dl_date_of_symbol(
+    a = rp.get_date_should_download(
         category=PriceDataCategory.BAR,
         time_frame=TimeFrame.MIN,
-        symbol='VTI'
+        symbol='BEST'
     )
     print(a)
 
