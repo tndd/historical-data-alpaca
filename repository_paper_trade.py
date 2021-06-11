@@ -153,9 +153,12 @@ class RepositoryPaperTrade:
             category: PriceDataCategory,
             time_frame: TimeFrame,
             symbol: str
-    ) -> str:
+    ) -> Optional[str]:
         df = self._get_df_market_data_dl_progress_active(category, time_frame).set_index('symbol')
-        return df.at[symbol, 'until']
+        date = str(df.at[symbol, 'until'])
+        if date == 'NaT':
+            return None
+        return date
 
 
 def main():
@@ -167,9 +170,9 @@ def main():
     a = rp.get_latest_dl_date_of_symbol(
         category=PriceDataCategory.BAR,
         time_frame=TimeFrame.MIN,
-        symbol='BEST'
+        symbol='VTI'
     )
-    print(a is pd.NaT)
+    print(a)
 
 
 if __name__ == '__main__':

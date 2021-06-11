@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 import requests
 import time
 import yaml
@@ -76,14 +75,30 @@ class ClientMarketData(ClientAlpaca):
 
     def download_price_data(self, symbol: str) -> None:
         # get latest date of symbol for download
-        dl_time_start = self._repository_pt.get_latest_dl_date_of_symbol(
+        dl_date_start = self._repository_pt.get_latest_dl_date_of_symbol(
             category=self._category,
             time_frame=self._time_frame,
             symbol=symbol
         )
-        if dl_time_start is pd.NaT:
-            dl_time_start = self._start_time
-        self._logger.debug(f'Download bar data "{symbol} will start. span: "{dl_time_start}" -> "{self._end_time}".')
+        # assign start_time to dl_date_start if dl_date_start is not exist.
+        if dl_date_start is None:
+            dl_date_start = self._start_time
+        # if the latest dl date is newer than end_time, the dl is not executed.
+        elif self._end_time < dl_date_start:
+            self._logger.debug((
+                f'Price Data {symbol} is already downloaded. '
+                f'Category: {self._category.value}, '
+                f'TimeFrame: {self._time_frame.value}, '
+                f'Downloaded until: {dl_date_start}, '
+                f'Designated dl until: {self._end_time}'
+            ))
+            return
+        self._logger.debug((
+            f'Download price data "{symbol} will start. '
+            f'Category: {self._category.value}, '
+            f'TimeFrame: {self._time_frame.value}, '
+            f'Span: "{dl_date_start}" -> "{self._end_time}".'
+        ))
         time_start = datetime.now()
         # make dir for download symbol bars data
         dl_bars_seg_dst = self._get_dest_dl_ctg_symbol_timeframe(symbol)
@@ -93,7 +108,7 @@ class ClientMarketData(ClientAlpaca):
         while True:
             bars_seg = self._request_price_data_segment(
                 symbol=symbol,
-                dl_start_time=dl_time_start,
+                dl_start_time=dl_date_start,
                 page_token=next_page_token
             )
             # save bars_seg data in file
