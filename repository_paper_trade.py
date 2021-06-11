@@ -73,7 +73,7 @@ class RepositoryPaperTrade:
 
     def _init_market_data_dl_progress(self) -> None:
         if self._count_market_data_dl_progress() != 0:
-            self._logger.info(f'Table "{self._tbl_name_dl_progress}" is already initialized.')
+            self._logger.debug(f'Table "{self._tbl_name_dl_progress}" is already initialized.')
             return
         asset_ids = self._load_assets_dataframe()['id']
         lines = []
@@ -164,10 +164,12 @@ def main():
     #     category=PriceDataCategory.BAR,
     #     time_frame=TimeFrame.MIN,
     # ).set_index('asset_id')['symbol']
-    print(rp.get_symbols_market_data_download_todo(
+    a = rp.get_latest_dl_date_of_symbol(
         category=PriceDataCategory.BAR,
-        time_frame=TimeFrame.MIN
-    ))
+        time_frame=TimeFrame.MIN,
+        symbol='BEST'
+    )
+    print(a is pd.NaT)
 
 
 if __name__ == '__main__':

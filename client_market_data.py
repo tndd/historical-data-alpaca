@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import requests
 import time
 from dataclasses import dataclass
@@ -35,7 +36,7 @@ class ClientMarketData(ClientAlpaca):
         """
         [(time, symbol, open, high, low, close, volume), (...)]
         """
-        url = f"{self._base_url}/stocks/{symbol}/{PriceDataCategory.value}"
+        url = f"{self._base_url}/stocks/{symbol}/{PriceDataCategory.BAR.value}"
         query = {
             'start': dl_start_time,
             'end': self._end_time,
@@ -66,28 +67,37 @@ class ClientMarketData(ClientAlpaca):
         if time_too_early > 0:
             self._logger.debug(f'Request time is too early, wait "{time_too_early}" sec.')
             time.sleep(time_too_early)
-        # lines = [(time, symbol, open, high, low, close, volume), (...)]
+        # bar_lines: [(time, symbol, open, high, low, close, volume), (...)]
         bar_lines = []
-        for bar in r.json()['bars']:
+        bars_len = len(r.json()['bars'])
+        for i, bar in enumerate(r.json()['bars']):
             bar_lines.append(
-                (bar['t'], r.json()['symbol'], bar['o'], bar['h'], bar['l'], bar['c'], bar['v']))
+                (bar['t'], r.json()['symbol'], bar['o'], bar['h'], bar['l'], bar['c'], bar['v'])
+            )
+            self._logger.debug(f'Append to "{symbol}" bar_lines: {i + 1} / {bars_len}')
         return bar_lines, r.json()['next_page_token']
 
     def download_bars(self, symbol: str) -> list:
         # download bars of symbol
         next_page_token = None
         bars_of_symbol = []
-        dl_time_start = self._repository_pt.get_latest_dl_date_of_symbol(symbol)
-        if dl_time_start is None:
+        dl_time_start = self._repository_pt.get_latest_dl_date_of_symbol(
+            category=PriceDataCategory.BAR,
+            time_frame=self._time_frame,
+            symbol=symbol
+        )
+        if dl_time_start is pd.NaT:
             dl_time_start = self._start_time
-            self._logger.debug(f'Download bar data "{symbol} will start. span: "{dl_time_start}" -> "{self._end_time}".')
+        self._logger.debug(f'Download bar data "{symbol} will start. span: "{dl_time_start}" -> "{self._end_time}".')
         time_start = datetime.now()
         while True:
+            self._logger.info('start')
             bar_lines, next_page_token = self._request_bar_lines(
                 symbol=symbol,
                 dl_start_time=dl_time_start,
                 page_token=next_page_token
             )
+            self._logger.info(next_page_token)
             bars_of_symbol.extend(bar_lines)
             if next_page_token is None:
                 break
@@ -120,7 +130,9 @@ class ClientMarketData(ClientAlpaca):
 
 def main():
     client = ClientMarketData()
-    client.download_bars_all_symbols()
+    bars = client.download_bars('BEST')
+    from pprint import pprint
+    pprint(bars)
 
 
 if __name__ == '__main__':
