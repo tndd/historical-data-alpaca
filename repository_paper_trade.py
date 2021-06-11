@@ -163,7 +163,7 @@ class RepositoryPaperTrade:
         date = df.at[symbol, 'until']
         if date == 'NaT':
             return None
-        return str(date + pd.tseries.offsets.Day())
+        return (date + pd.tseries.offsets.Day()).strftime('%Y-%m-%d')
 
 
 def main():
