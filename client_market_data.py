@@ -154,7 +154,7 @@ class ClientMarketData(ClientAlpaca):
         for i, path in enumerate(price_data_paths):
             with open(path, 'r') as f:
                 d = yaml.safe_load(f)
-                price_data_paths.append(d)
+                prices_data.append(d)
             self._logger.debug(f'Loading "{symbol}": {i + 1}/{prices_len}')
         self._logger.debug(f'Complete Loading "{symbol}". time: {datetime.now() - start_time}s.')
         return prices_data
