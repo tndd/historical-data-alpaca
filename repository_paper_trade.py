@@ -163,7 +163,7 @@ class RepositoryPaperTrade:
         """
         df = self._get_df_market_data_dl_progress_active(category, time_frame).set_index('symbol')
         date = df.at[symbol, 'until']
-        if date == 'NaT':
+        if date is pd.NaT:
             return None
         return (date + pd.tseries.offsets.Day()).strftime('%Y-%m-%d')
 
@@ -177,7 +177,7 @@ def main():
     a = rp.get_date_should_download(
         category=PriceDataCategory.BAR,
         time_frame=TimeFrame.MIN,
-        symbol='BEST'
+        symbol='VWO'
     )
     print(a)
 
