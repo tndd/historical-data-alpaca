@@ -1,3 +1,4 @@
 from data_types.price_data_category import PriceDataCategory
 from data_types.market_data_category import MarketDataCategory
 from data_types.time_frame import TimeFrame
+from data_types.query_type import QueryType

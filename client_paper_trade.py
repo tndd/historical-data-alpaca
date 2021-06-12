@@ -17,7 +17,7 @@ class ClientPaperTrade(ClientAlpaca):
         self._logger = self._logger.getChild(__name__)
         self._assets_path = f"{self._dl_destination}/{self._assets_name}"
         self._symbol_dl_progress_path = f"{self._dl_destination}/{self._symbol_dl_progress_name}"
-        self._symbol_dl_progress = self.load_symbol_dl_progress()
+        # self._symbol_dl_progress = self.load_symbol_dl_progress()
 
     def get_assets(self) -> dict:
         url = f"{self._base_url}/assets"
