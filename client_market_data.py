@@ -134,7 +134,7 @@ class ClientMarketData(ClientAlpaca):
                 f'Path: "{dl_bars_seg_dst}"'
             ))
             return
-        self._logger.debug(f'Request bars set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
+        self._logger.info(f'Request bars set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
         # update download progress status
         self._repository_pt.update_market_data_dl_progress(
             category=self._category,
@@ -163,7 +163,7 @@ class ClientMarketData(ClientAlpaca):
                 f'Load time: "{time_now - time_prev}"'
             ))
             time_prev = time_now
-        self._logger.debug(f'Complete Loading "{symbol}". time: {datetime.now() - time_start}s.')
+        self._logger.info(f'Complete Loading "{symbol}". time: {datetime.now() - time_start}s.')
         return prices_data
 
     def download_price_data_all(self) -> None:

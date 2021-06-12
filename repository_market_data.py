@@ -53,14 +53,14 @@ class RepositoryMarketData:
             now_time = datetime.now()
             self._logger.debug((
                 f'Symbol: "{symbol}", '
-                f'Progress: "{i + 1}/{price_data_len}", '
-                f'Load time: "{now_time - prev_time}"'
+                f'Making bars lines: "{i + 1}/{price_data_len}", '
+                f'Time: "{now_time - prev_time}"'
             ))
             prev_time = now_time
         # sort ascending by time
         bars_lines.sort(key=lambda b: b[0])
-        self._logger.debug((
-            f'Complete Loading bars_linse "{symbol}", '
+        self._logger.info((
+            f'Complete Loading bars_lines "{symbol}", '
             f'Total time: "{datetime.now() - time_start}", '
             f'Sort time: "{datetime.now() - prev_time}"'
         ))
@@ -80,8 +80,13 @@ class RepositoryMarketData:
 
 
 def main():
-    rp = RepositoryMarketData()
-    bars = rp.load_bars_df('BEST')
+    client_md = ClientMarketData(
+        _end_time='2021-06-03'
+    )
+    rp = RepositoryMarketData(
+        _client_md=client_md
+    )
+    bars = rp.load_bars_df('VWO')
     print(bars)
 
 
