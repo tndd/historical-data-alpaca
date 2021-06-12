@@ -149,14 +149,21 @@ class ClientMarketData(ClientAlpaca):
         self._download_price_data(symbol)
         price_data_paths = glob(f'{self._get_dest_dl_ctg_symbol_timeframe(symbol)}/*.yaml')
         prices_len = len(price_data_paths)
-        start_time = datetime.now()
+        time_start = datetime.now()
         prices_data = []
+        time_prev = time_start
         for i, path in enumerate(price_data_paths):
             with open(path, 'r') as f:
                 d = yaml.safe_load(f)
                 prices_data.append(d)
-            self._logger.debug(f'Loading "{symbol}": {i + 1}/{prices_len}')
-        self._logger.debug(f'Complete Loading "{symbol}". time: {datetime.now() - start_time}s.')
+            # report progress
+            time_now = datetime.now()
+            self._logger.debug((
+                f'Loading "{symbol} from files": {i + 1}/{prices_len}, '
+                f'Load time: "{time_now - time_prev}"'
+            ))
+            time_prev = time_now
+        self._logger.debug(f'Complete Loading "{symbol}". time: {datetime.now() - time_start}s.')
         return prices_data
 
     def download_price_data_all(self) -> None:

@@ -47,15 +47,10 @@ class RepositoryMarketData:
         # if download bars is not completed, it will be downloaded automatically.
         price_data_list = self._client_md.load_price_data(symbol)
         price_data_len = len(price_data_list)
-        self._logger.debug((
-            f'Loaded price data "{symbol}", '
-            f'Num: "{price_data_len}", '
-            f'Load time: "{datetime.now() - time_start}"'
-        ))
         bars_lines = []
         # time record
         prev_time = time_start
-        # load bars files
+        # convert price data to bars_lines
         for i, price_data in enumerate(price_data_list):
             for bar in price_data['bars']:
                 # convert format RFC3339 to mysql_datetime
@@ -63,7 +58,7 @@ class RepositoryMarketData:
                 bars_lines.append([bar_time, symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
             # report progress
             now_time = datetime.now()
-            self._logger.info((
+            self._logger.debug((
                 f'Symbol: "{symbol}", '
                 f'Progress: "{i + 1}/{price_data_len}", '
                 f'Load time: "{now_time - prev_time}"'
@@ -71,10 +66,10 @@ class RepositoryMarketData:
             prev_time = now_time
         # sort ascending by time
         bars_lines.sort(key=lambda b: b[0])
-        self._logger.info((
-            f"{symbol} bars_lines is loaded. "
-            f"total time: \"{datetime.now() - time_start}\", "
-            f"sort time: \"{datetime.now() - prev_time}\""
+        self._logger.debug((
+            f'Complete Loading bars_linse "{symbol}", '
+            f'Total time: "{datetime.now() - time_start}", '
+            f'Sort time: "{datetime.now() - prev_time}"'
         ))
         return bars_lines
 
