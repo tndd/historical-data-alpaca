@@ -130,8 +130,8 @@ class RepositoryPaperTrade:
             category: PriceDataCategory,
             time_frame: TimeFrame,
             symbol: str,
-            message: Optional[str],
-            time_until: str
+            time_until: str,
+            message: str = None
     ) -> None:
         asset_id = self._get_df_market_data_dl_progress_active(
             category,
@@ -141,8 +141,8 @@ class RepositoryPaperTrade:
         param = (time_until, message, asset_id, category.value, time_frame.value)
         self._client_db.cur.execute(query, param)
         self._client_db.conn.commit()
-        self._logger.debug((
-            f'Updated dl_progress. '
+        self._logger.info((
+            f'Updated download progress of "{symbol}". '
             f'Category: {category.value}, '
             f'Time frame: {time_frame.value}, '
             f'Asset id: {asset_id}, '
