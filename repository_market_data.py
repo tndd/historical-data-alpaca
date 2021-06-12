@@ -29,13 +29,8 @@ class RepositoryMarketData:
         self._client_db.conn.commit()
 
     def _count_symbol_table_bars_1min(self, symbol: str) -> int:
-        # TODO: delete maybe
-        query = f'''
-            SELECT COUNT(*)
-            FROM bars_1min
-            WHERE symbol = '{symbol}';
-        '''
-        self._client_db.cur.execute(query)
+        query = self._client_db.load_query_by_name(QueryType.COUNT, 'bars_1min_symbol')
+        self._client_db.cur.execute(query, (symbol,))
         return self._client_db.cur.fetchone()[0]
 
     def _load_bars_min_dataframe(self, symbol: str) -> pd.DataFrame:
@@ -74,17 +69,12 @@ class RepositoryMarketData:
         return bars_lines
 
     def _store_bars_to_db(self, symbol: str) -> None:
-        query = '''
-            INSERT INTO alpaca_market_db.bars_1min (`time`, symbol, `open`, high, low, `close`, volume)
-            VALUES(%s, %s, %s, %s, %s, %s, %s);
-        '''
-        # TODO: bars lines will get from market_data_client directly.
+        query = self._client_db.load_query_by_name(QueryType.INSERT, self._tbl_name_bars_min)
         bars_lines = self._load_bars_lines_from_files(symbol)
         self._client_db.insert_lines(query, bars_lines)
         self._logger.info(f'bars "{symbol}" is stored to db.')
 
     def load_bars_df(self, symbol: str) -> pd.DataFrame:
-        # TODO: delete maybe. because this func can be integrated into "_load_bars_min_dataframe".
         if self._count_symbol_table_bars_1min(symbol) == 0:
             self._logger.info(f'bars "{symbol}" is not exist in db, it will be stored.')
             self._store_bars_to_db(symbol)
@@ -93,7 +83,7 @@ class RepositoryMarketData:
 
 def main():
     rp = RepositoryMarketData()
-    bars = rp._load_bars_lines_from_files('BEST')
+    bars = rp._count_symbol_table_bars_1min('BEST')
     print(bars)
 
 
