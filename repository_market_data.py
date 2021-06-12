@@ -43,39 +43,37 @@ class RepositoryMarketData:
         return pd.read_sql(query, self._client_db.conn, params=(symbol,))
 
     def _load_bars_lines_from_files(self, symbol: str) -> list:
-        # TODO: delete maybe. because tmp file for saving is not necessary.
-        bars_dir_path = self._client_md.get_dest_dl_ctg_symbol_timeframe(symbol)
-        bars_paths = glob.glob(f"{bars_dir_path}/*.yaml")
+        time_start = datetime.now()
         # if download bars is not completed, it will be downloaded automatically.
-        self._client_md._download_price_data(symbol)
-        # recount bars data num
-        bars_num = len(bars_paths)
-        self._logger.info(f'symbol: "{symbol}", bars data num: "{bars_num}"')
+        price_data_list = self._client_md.load_price_data(symbol)
+        price_data_len = len(price_data_list)
+        self._logger.debug((
+            f'Loaded price data "{symbol}", '
+            f'Num: "{price_data_len}", '
+            f'Load time: "{datetime.now() - time_start}"'
+        ))
         bars_lines = []
         # time record
-        start_time = datetime.now()
-        prev_time = start_time
+        prev_time = time_start
         # load bars files
-        for i, bars_path in enumerate(bars_paths):
-            with open(bars_path, 'r') as f:
-                d = yaml.safe_load(f)
-            for bar in d['bars']:
+        for i, price_data in enumerate(price_data_list):
+            for bar in price_data['bars']:
                 # convert format RFC3339 to mysql_datetime
                 bar_time = datetime.strptime(bar['t'], '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S')
                 bars_lines.append([bar_time, symbol, bar['o'], bar['h'], bar['l'], bar['c'], bar['v']])
             # report progress
             now_time = datetime.now()
             self._logger.info((
-                f"progress: \"{i + 1}/{bars_num}\", "
-                f"load time: \"{now_time - prev_time}\", "
-                f"loaded: \"{bars_path}\""
+                f'Symbol: "{symbol}", '
+                f'Progress: "{i + 1}/{price_data_len}", '
+                f'Load time: "{now_time - prev_time}"'
             ))
             prev_time = now_time
         # sort ascending by time
         bars_lines.sort(key=lambda b: b[0])
         self._logger.info((
             f"{symbol} bars_lines is loaded. "
-            f"total time: \"{datetime.now() - start_time}\", "
+            f"total time: \"{datetime.now() - time_start}\", "
             f"sort time: \"{datetime.now() - prev_time}\""
         ))
         return bars_lines
@@ -100,8 +98,8 @@ class RepositoryMarketData:
 
 def main():
     rp = RepositoryMarketData()
-    df = rp._load_bars_min_dataframe('SPY')
-    print(df)
+    bars = rp._load_bars_lines_from_files('BEST')
+    print(bars)
 
 
 if __name__ == '__main__':
