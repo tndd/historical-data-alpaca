@@ -3,9 +3,7 @@ import requests
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from client_alpaca import ClientAlpaca
-from client_db import ClientDB
-from repository_paper_trade import RepositoryPaperTrade
+from client import ClientAlpaca, ClientDB
 from data_types import TimeFrame, PriceDataCategory
 from exceptions import AlpacaApiRateLimit
 
@@ -19,7 +17,6 @@ class ClientMarketData(ClientAlpaca):
     _time_frame: TimeFrame = TimeFrame.MIN
     _limit: int = 10000
     _client_db: ClientDB = ClientDB()
-    _repository_pt: RepositoryPaperTrade = RepositoryPaperTrade()
     _api_rate_limit = 200
 
     def __post_init__(self) -> None:

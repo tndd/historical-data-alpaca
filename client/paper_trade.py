@@ -1,7 +1,7 @@
 import requests
 import os
 from dataclasses import dataclass
-from client_alpaca import ClientAlpaca
+from client import ClientAlpaca
 
 
 @dataclass

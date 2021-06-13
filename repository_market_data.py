@@ -6,8 +6,7 @@ from dataclasses import dataclass
 from glob import glob
 from datetime import datetime, timedelta
 from logging import Logger
-from client_market_data import ClientMarketData
-from client_db import ClientDB
+from client import ClientMarketData, ClientDB
 from repository_paper_trade import RepositoryPaperTrade
 from data_types import TimeFrame, PriceDataCategory
 from data_types import QueryType
@@ -206,7 +205,7 @@ def main():
     rp = RepositoryMarketData(
         _end_time='2021-06-05'
     )
-    bars = rp.load_bars_df('SPY')
+    bars = rp.load_bars_df('BEST')
     print(bars)
 
 
