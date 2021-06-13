@@ -3,6 +3,7 @@ import requests
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
 from repository.client import ClientAlpaca, ClientDB
 from data_types import TimeFrame, PriceDataCategory
 from exceptions import AlpacaApiRateLimit
@@ -21,6 +22,7 @@ class ClientMarketData(ClientAlpaca):
 
     def __post_init__(self) -> None:
         self._logger = self._logger.getChild(__name__)
+        self._dl_destination = f'{Path(__file__).parent}/../../api_data'
         self._dest_dl_category = f'{self._dl_destination}/{PriceDataCategory.BAR.value}'
         self._api_rate_limit_per_min = (self._api_rate_limit // 59)
 
@@ -74,7 +76,7 @@ def main():
     client = ClientMarketData(
         _end_time='2021-06-03'
     )
-    print(client)
+    print(client.get_dest_dl_ctg_symbol_timeframe('BEST'))
 
 
 if __name__ == '__main__':
