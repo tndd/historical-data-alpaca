@@ -13,8 +13,6 @@ from data_types import TimeFrame, PriceDataCategory
 from data_types import QueryType
 from logger_alpaca.logger_alpaca import get_logger
 
-os.makedirs('log', exist_ok=True)
-
 
 @dataclass
 class RepositoryMarketData:
