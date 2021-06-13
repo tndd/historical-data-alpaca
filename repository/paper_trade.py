@@ -2,7 +2,7 @@ import pandas as pd
 from dataclasses import dataclass
 from logging import Logger
 from typing import Optional
-from client import ClientPaperTrade, ClientDB
+from repository.client import ClientPaperTrade, ClientDB
 from data_types import QueryType, PriceDataCategory, TimeFrame
 from logger_alpaca.logger_alpaca import get_logger
 

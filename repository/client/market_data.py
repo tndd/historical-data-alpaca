@@ -3,7 +3,7 @@ import requests
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from client import ClientAlpaca, ClientDB
+from repository.client import ClientAlpaca, ClientDB
 from data_types import TimeFrame, PriceDataCategory
 from exceptions import AlpacaApiRateLimit
 

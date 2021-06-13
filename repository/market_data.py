@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from glob import glob
 from datetime import datetime, timedelta
 from logging import Logger
-from client import ClientMarketData, ClientDB
+from repository.client import ClientMarketData, ClientDB
 from repository import RepositoryPaperTrade
 from data_types import TimeFrame, PriceDataCategory, QueryType
 from logger_alpaca.logger_alpaca import get_logger

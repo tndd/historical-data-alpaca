@@ -18,7 +18,7 @@ class ClientDB:
     _passwd: str = os.getenv('DB_PASSWORD')
     _host: str = os.getenv('DB_HOST')
     _name: str = os.getenv('DB_NAME')
-    _sql_dir_path: str = '../sql'
+    _sql_dir_path: str = 'sql'
 
     def __post_init__(self) -> None:
         self.conn = self.create_connection()
