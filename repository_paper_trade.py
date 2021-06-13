@@ -2,20 +2,19 @@ import os
 import pandas as pd
 from dataclasses import dataclass
 from dotenv import load_dotenv
-from logging import getLogger, config, Logger
+from logging import Logger
 from typing import Optional
 from client_db import ClientDB
 from client_paper_trade import ClientPaperTrade
 from data_types import QueryType, PriceDataCategory, TimeFrame
+from logger_alpaca.logger_alpaca import get_logger
 
 load_dotenv()
-os.makedirs('log', exist_ok=True)
-config.fileConfig('logging.conf')
 
 
 @dataclass
 class RepositoryPaperTrade:
-    _logger: Logger = getLogger(__name__)
+    _logger: Logger = get_logger(__name__)
     _client_db: ClientDB = ClientDB()
     _client_pt: ClientPaperTrade = ClientPaperTrade()
     _tbl_name_assets: str = 'assets'
@@ -163,7 +162,8 @@ class RepositoryPaperTrade:
         """
         df = self._get_df_market_data_dl_progress_active(category, time_frame).set_index('symbol')
         date = df.at[symbol, 'until']
-        if date is pd.NaT:
+        # when initialized, date becomes None, and after that it becomes NaT. the reason is unknown.
+        if date is None or date is pd.NaT:
             return None
         return (date + pd.tseries.offsets.Day()).strftime('%Y-%m-%d')
 
@@ -177,7 +177,7 @@ def main():
     a = rp.get_date_should_download(
         category=PriceDataCategory.BAR,
         time_frame=TimeFrame.MIN,
-        symbol='VWO'
+        symbol='SPY'
     )
     print(a)
 

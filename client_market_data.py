@@ -1,9 +1,6 @@
 import os
 import requests
 import time
-import yaml
-import shutil
-from glob import glob
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from client_alpaca import ClientAlpaca
@@ -30,7 +27,7 @@ class ClientMarketData(ClientAlpaca):
         self._dest_dl_category = f'{self._dl_destination}/{PriceDataCategory.BAR.value}'
         self._api_rate_limit_per_min = (self._api_rate_limit // 59)
 
-    def _request_price_data_segment(
+    def request_price_data_segment(
             self,
             symbol: str,
             dl_start_time: str,
@@ -72,126 +69,15 @@ class ClientMarketData(ClientAlpaca):
             time.sleep(time_too_early)
         return r.json()
 
-    def _get_dest_dl_ctg_symbol_timeframe(self, symbol: str) -> str:
+    def get_dest_dl_ctg_symbol_timeframe(self, symbol: str) -> str:
         return f'{self._dest_dl_category}/{symbol}/{self._time_frame.value}'
-
-    def _download_price_data(self, symbol: str) -> None:
-        # get latest date of symbol for download
-        dl_date_start = self._repository_pt.get_date_should_download(
-            category=self._category,
-            time_frame=self._time_frame,
-            symbol=symbol
-        )
-        # assign start_time to dl_date_start if dl_date_start is not exist.
-        if dl_date_start is None:
-            dl_date_start = self._start_time
-        # if the latest dl date is newer than end_time, the dl is not executed.
-        elif self._end_time < dl_date_start:
-            self._logger.debug((
-                f'Price Data {symbol} is already downloaded. '
-                f'Category: {self._category.value}, '
-                f'TimeFrame: {self._time_frame.value}, '
-                f'Downloaded until: {dl_date_start}, '
-                f'Designated dl until: {self._end_time}'
-            ))
-            return
-        self._logger.debug((
-            f'Download price data "{symbol} will start. '
-            f'Category: {self._category.value}, '
-            f'TimeFrame: {self._time_frame.value}, '
-            f'Span: "{dl_date_start}" -> "{self._end_time}".'
-        ))
-        time_start = datetime.now()
-        # make dir for download symbol bars data
-        dl_bars_seg_dst = self._get_dest_dl_ctg_symbol_timeframe(symbol)
-        os.makedirs(dl_bars_seg_dst, exist_ok=True)
-        # download bars of symbol
-        next_page_token = None
-        try:
-            while True:
-                bars_seg = self._request_price_data_segment(
-                    symbol=symbol,
-                    dl_start_time=dl_date_start,
-                    page_token=next_page_token
-                )
-                # save bars_seg data in file
-                title = f'head_{self._end_time}' if next_page_token is None else next_page_token
-                with open(f'{dl_bars_seg_dst}/{title}.yaml', 'w') as f:
-                    yaml.dump(bars_seg, f, indent=2)
-                # reset next token for download
-                if bars_seg['next_page_token'] is None:
-                    break
-                next_page_token = bars_seg['next_page_token']
-        except Exception as e:
-            shutil.rmtree(dl_bars_seg_dst)
-            self._logger.exception(e)
-            self._logger.warning((
-                f'Error occurred while downloading price data. '
-                f'Removed incompleteness data files. '
-                f'Symbol: "{symbol}", '
-                f'Category: {self._category}, '
-                f'Time frame: {self._time_frame}, '
-                f'Path: "{dl_bars_seg_dst}"'
-            ))
-            return
-        self._logger.info(f'Request bars set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
-        # update download progress status
-        self._repository_pt.update_market_data_dl_progress(
-            category=self._category,
-            time_frame=self._time_frame,
-            symbol=symbol,
-            message=None,
-            time_until=self._end_time
-        )
-
-    def load_price_data(self, symbol: str) -> list:
-        # preload data in files
-        self._download_price_data(symbol)
-        price_data_paths = glob(f'{self._get_dest_dl_ctg_symbol_timeframe(symbol)}/*.yaml')
-        prices_len = len(price_data_paths)
-        time_start = datetime.now()
-        prices_data = []
-        time_prev = time_start
-        for i, path in enumerate(price_data_paths):
-            with open(path, 'r') as f:
-                d = yaml.safe_load(f)
-                prices_data.append(d)
-            # report progress
-            time_now = datetime.now()
-            self._logger.debug((
-                f'Loading "{symbol} from files": {i + 1}/{prices_len}, '
-                f'Load time: "{time_now - time_prev}"'
-            ))
-            time_prev = time_now
-        self._logger.info(f'Complete Loading "{symbol}". time: {datetime.now() - time_start}s.')
-        return prices_data
-
-    def download_price_data_all(self) -> None:
-        symbols_dl_todo = self._repository_pt.get_symbols_market_data_download_todo(
-            category=self._category,
-            time_frame=self._time_frame,
-            time_until=self._end_time
-        )
-        download_num = len(symbols_dl_todo)
-        self._logger.info(f'Num of download bars: {download_num}')
-        time_start = datetime.now()
-        for i, symbol in enumerate(symbols_dl_todo):
-            self._download_price_data(symbol)
-            self._logger.info(f'Download progress: {i+1} / {download_num}')
-        self._logger.info((
-            f'Download all price data is completed. '
-            f'Category: {self._category.value}, '
-            f'Time frame: {self._time_frame.value}, '
-            f'Time: "{datetime.now() - time_start}s"'
-        ))
 
 
 def main():
     client = ClientMarketData(
         _end_time='2021-06-03'
     )
-    a = client.load_price_data('BEST')
-    print(a)
+    print(client)
 
 
 if __name__ == '__main__':
