@@ -2,19 +2,18 @@ import os
 import mysql.connector
 from dataclasses import dataclass
 from dotenv import load_dotenv
-from logging import getLogger, config, Logger
+from logging import Logger
 from pathlib import Path
 from exceptions import NotExistSqlFile
 from data_types import QueryType
+from logger_alpaca.logger_alpaca import get_logger
 
 load_dotenv()
-os.makedirs('log', exist_ok=True)
-config.fileConfig('logging.conf')
 
 
 @dataclass
 class ClientDB:
-    _logger: Logger = getLogger(__name__)
+    _logger: Logger = get_logger(__name__)
     _user: str = os.getenv('DB_USER')
     _passwd: str = os.getenv('DB_PASSWORD')
     _host: str = os.getenv('DB_HOST')
