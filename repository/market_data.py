@@ -7,9 +7,8 @@ from glob import glob
 from datetime import datetime, timedelta
 from logging import Logger
 from client import ClientMarketData, ClientDB
-from repository_paper_trade import RepositoryPaperTrade
-from data_types import TimeFrame, PriceDataCategory
-from data_types import QueryType
+from repository import RepositoryPaperTrade
+from data_types import TimeFrame, PriceDataCategory, QueryType
 from logger_alpaca.logger_alpaca import get_logger
 
 
