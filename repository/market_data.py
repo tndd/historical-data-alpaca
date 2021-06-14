@@ -20,15 +20,18 @@ class RepositoryMarketData:
     _category: PriceDataCategory = PriceDataCategory.BAR
     _time_frame: TimeFrame = TimeFrame.MIN
     _client_db: ClientDB = ClientDB()
-    _repository_pt: RepositoryPaperTrade = RepositoryPaperTrade()
     _tbl_name_bars_min: str = 'bars_1min'
 
     def __post_init__(self) -> None:
+        self._repository_pt = RepositoryPaperTrade(
+            _client_db=self._client_db
+        )
         self._client_md = ClientMarketData(
             _start_time=self._start_time,
             _end_time=self._end_time,
             _category=self._category,
-            _time_frame=self._time_frame
+            _time_frame=self._time_frame,
+            _client_db=self._client_db
         )
         self._create_tables()
 
