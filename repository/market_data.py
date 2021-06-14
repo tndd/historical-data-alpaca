@@ -187,7 +187,7 @@ class RepositoryMarketData:
         ))
         return bars_lines
 
-    def _store_bars_to_db(self, symbol: str) -> None:
+    def store_bars_to_db(self, symbol: str) -> None:
         query = self._client_db.load_query_by_name(QueryType.INSERT, self._tbl_name_bars_min)
         bars_lines = self._load_bars_lines_from_files(symbol)
         self._client_db.insert_lines(query, bars_lines)
@@ -196,7 +196,7 @@ class RepositoryMarketData:
     def load_bars_df(self, symbol: str) -> pd.DataFrame:
         if self._count_symbol_table_bars_1min(symbol) == 0:
             self._logger.info(f'Bars "{symbol}" is not exist in db, it will be stored.')
-            self._store_bars_to_db(symbol)
+            self.store_bars_to_db(symbol)
         return self._load_bars_min_dataframe(symbol)
 
 
