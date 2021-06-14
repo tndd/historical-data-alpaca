@@ -75,36 +75,27 @@ class RepositoryMarketData:
         time_start = datetime.now()
         # make dir for download symbol bars data
         dl_bars_seg_dst = self._client_md.get_dest_dl_ctg_symbol_timeframe(symbol)
+        # initialize download dest directory
+        if os.path.exists(dl_bars_seg_dst):
+            shutil.rmtree(dl_bars_seg_dst)
+            self._logger.debug(f'Removed the half-download files "{symbol}"')
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
         # download bars of symbol
         next_page_token = None
-        try:
-            while True:
-                bars_seg = self._client_md.request_price_data_segment(
-                    symbol=symbol,
-                    dl_start_time=dl_date_start,
-                    page_token=next_page_token
-                )
-                # save bars_seg data in file
-                title = f'head_{self._end_time}' if next_page_token is None else next_page_token
-                with open(f'{dl_bars_seg_dst}/{title}.yaml', 'w') as f:
-                    yaml.dump(bars_seg, f, indent=2)
-                # reset next token for download
-                if bars_seg['next_page_token'] is None:
-                    break
-                next_page_token = bars_seg['next_page_token']
-        except Exception as e:
-            shutil.rmtree(dl_bars_seg_dst)
-            self._logger.exception(e)
-            self._logger.warning((
-                f'Error occurred while downloading price data. '
-                f'Removed incompleteness data files. '
-                f'Symbol: "{symbol}", '
-                f'Category: {self._category}, '
-                f'Time frame: {self._time_frame}, '
-                f'Path: "{dl_bars_seg_dst}"'
-            ))
-            return
+        while True:
+            bars_seg = self._client_md.request_price_data_segment(
+                symbol=symbol,
+                dl_start_time=dl_date_start,
+                page_token=next_page_token
+            )
+            # save bars_seg data in file
+            title = f'head_{self._end_time}' if next_page_token is None else next_page_token
+            with open(f'{dl_bars_seg_dst}/{title}.yaml', 'w') as f:
+                yaml.dump(bars_seg, f, indent=2)
+            # reset next token for download
+            if bars_seg['next_page_token'] is None:
+                break
+            next_page_token = bars_seg['next_page_token']
         self._logger.info(f'Request bars set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
         # update download progress status
         self._repository_pt.update_market_data_dl_progress(
