@@ -18,7 +18,7 @@ class ClientDB:
     _passwd: str = os.getenv('DB_PASSWORD')
     _host: str = os.getenv('DB_HOST')
     _name: str = os.getenv('DB_NAME')
-    _sql_dir_path: str = 'sql'
+    _sql_dir_name: str = 'sql'
 
     def __post_init__(self) -> None:
         self.conn = self.create_connection()
@@ -26,7 +26,7 @@ class ClientDB:
         self.init_db()
 
     def get_sql_file_path(self, query_type: QueryType, file_name: str) -> str:
-        file_path = f'{Path(__file__).parent}/{self._sql_dir_path}/{query_type.value}/{file_name}.sql'
+        file_path = f'{Path(__file__).parent}/{self._sql_dir_name}/{query_type.value}/{file_name}.sql'
         if not os.path.exists(file_path):
             raise NotExistSqlFile(f'Not exist sql file. name: "{query_type.value}/{file_name}.sql"')
         return file_path
