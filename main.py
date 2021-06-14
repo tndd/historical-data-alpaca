@@ -3,27 +3,16 @@ from repository import RepositoryMarketData
 
 symbols = [
     'AAPL',
-    'NVDA',
     'JNJ',
-    'PFE',
-    'PG',
     'WMT',
     'VZ',
-    'T',
     'NEE',
-    'DUK'
     'JPM',
-    'V',
     'XOM',
-    'CVX',
     'NKE',
-    'MCD',
     'LMT',
-    'UNP',
     'LIN',
-    'SHW',
     'AMT',
-    'CCI'
 ]
 
 repo = RepositoryMarketData(
