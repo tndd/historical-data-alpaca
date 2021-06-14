@@ -6,7 +6,7 @@ from logging import config, getLogger, Logger
 
 
 def get_logger(logger_name: str) -> Logger:
-    datetime_now = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    datetime_now = datetime.now().strftime('%Y%m%d%H%M%S')
     log_file_name = f'{datetime_now}.log'
     parent_path = Path(__file__).parent
     log_conf_name = 'logging.json'
