@@ -11,7 +11,7 @@ symbols = [
     'XOM',
     'NKE',
     'LMT',
-    'LIN',
+    'SHW',
     'AMT',
 ]
 
