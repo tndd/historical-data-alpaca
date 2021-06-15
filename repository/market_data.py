@@ -152,7 +152,7 @@ class RepositoryMarketData:
 
     def _load_bars_lines_from_files(self, symbol: str) -> list:
         time_start = datetime.now()
-        # if download bars is not completed, it will be downloaded automatically.
+        # download price data will start anew nad existing data files will be deleted
         price_data_list = self._load_price_data(symbol)
         price_data_len = len(price_data_list)
         bars_lines = []
