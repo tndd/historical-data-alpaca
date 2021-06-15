@@ -10,6 +10,7 @@ from repository.client import ClientMarketData, ClientDB
 from repository import RepositoryPaperTrade
 from data_types import TimeFrame, PriceDataCategory, QueryType
 from logger_alpaca.logger_alpaca import get_logger
+from exceptions import FailDownloadPriceData
 
 
 @dataclass
@@ -78,28 +79,29 @@ class RepositoryMarketData:
         time_start = datetime.now()
         # make dir for download symbol bars data
         dl_bars_seg_dst = self._client_md.get_dest_dl_ctg_symbol_timeframe(symbol)
-        # initialize download dest directory
-        if os.path.exists(dl_bars_seg_dst):
-            shutil.rmtree(dl_bars_seg_dst)
-            self._logger.debug(f'Removed the half-download files "{symbol}"')
         os.makedirs(dl_bars_seg_dst, exist_ok=True)
         # download bars of symbol
         next_page_token = None
-        while True:
-            bars_seg = self._client_md.request_price_data_segment(
-                symbol=symbol,
-                dl_start_time=dl_date_start,
-                page_token=next_page_token
-            )
-            # save bars_seg data in file
-            title = f'head_{self._end_time}' if next_page_token is None else next_page_token
-            with open(f'{dl_bars_seg_dst}/{title}.yaml', 'w') as f:
-                yaml.dump(bars_seg, f, indent=2)
-            # reset next token for download
-            if bars_seg['next_page_token'] is None:
-                break
-            next_page_token = bars_seg['next_page_token']
-        self._logger.info(f'Request bars set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
+        try:
+            while True:
+                bars_seg = self._client_md.request_price_data_segment(
+                    symbol=symbol,
+                    dl_start_time=dl_date_start,
+                    page_token=next_page_token
+                )
+                # save bars_seg data in file
+                title = f'head_{self._end_time}' if next_page_token is None else next_page_token
+                with open(f'{dl_bars_seg_dst}/{title}.yaml', 'w') as f:
+                    yaml.dump(bars_seg, f, indent=2)
+                # reset next token for download
+                if bars_seg['next_page_token'] is None:
+                    break
+                next_page_token = bars_seg['next_page_token']
+            self._logger.info(f'Request bars set "{symbol}" are completed. time: "{datetime.now() - time_start}"')
+        except (Exception, KeyboardInterrupt):
+            # if download fails, delete the half-files
+            shutil.rmtree(dl_bars_seg_dst)
+            raise FailDownloadPriceData(f'Downloading price data "{symbol}" is failed. removed the half-download files.')
         # update download progress status
         self._repository_pt.update_market_data_dl_progress(
             category=self._category,
@@ -152,7 +154,6 @@ class RepositoryMarketData:
 
     def _load_bars_lines_from_files(self, symbol: str) -> list:
         time_start = datetime.now()
-        # download price data will start anew nad existing data files will be deleted
         price_data_list = self._load_price_data(symbol)
         price_data_len = len(price_data_list)
         bars_lines = []
@@ -198,7 +199,7 @@ def main():
     rp = RepositoryMarketData(
         _end_time='2021-06-05'
     )
-    bars = rp.load_bars_df('BEST')
+    bars = rp._download_price_data('V')
     print(bars)
 
 

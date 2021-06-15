@@ -2,9 +2,9 @@ class AlpacaApiRateLimit(Exception):
     pass
 
 
-class NotExistSymbol(Exception):
+class NotExistSqlFile(Exception):
     pass
 
 
-class NotExistSqlFile(Exception):
+class FailDownloadPriceData(Exception):
     pass
