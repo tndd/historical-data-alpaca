@@ -20,4 +20,4 @@ repo = RepositoryMarketData(
 )
 
 for symbol in symbols:
-    repo.store_bars_to_db(symbol)
+    repo.update_bars_in_db(symbol)

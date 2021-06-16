@@ -22,8 +22,6 @@ class ClientMarketData(ClientAlpaca):
 
     def __post_init__(self) -> None:
         self._logger = self._logger.getChild(__name__)
-        self._dl_destination = f'{Path(__file__).parent}/../../api_data'
-        self._dest_dl_category = f'{self._dl_destination}/{PriceDataCategory.BAR.value}'
         self._api_rate_limit_per_min = (self._api_rate_limit // 59)
 
     def request_price_data_segment(
@@ -67,9 +65,6 @@ class ClientMarketData(ClientAlpaca):
             self._logger.debug(f'Request time is too early, wait "{time_too_early}" sec.')
             time.sleep(time_too_early)
         return r.json()
-
-    def get_dest_dl_ctg_symbol_timeframe(self, symbol: str) -> str:
-        return f'{self._dest_dl_category}/{symbol}/{self._time_frame.value}'
 
 
 def main():
