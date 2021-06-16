@@ -14,7 +14,7 @@ class ClientPaperTrade(ClientAlpaca):
     def get_assets(self) -> dict:
         url = f"{self._base_url}/assets"
         r = requests.get(url, headers=self.get_auth_headers())
-        self._logger.info(f"Request status code: \"{r.status_code}\"")
+        self._logger.debug(f"Request status code: \"{r.status_code}\"")
         return r.json()
 
 

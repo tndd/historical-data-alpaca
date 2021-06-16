@@ -28,6 +28,7 @@ class RepositoryPaperTrade:
         self._client_db.cur.execute(q_create_assets)
         self._client_db.cur.execute(q_create_market_data_dl_progress)
         self._client_db.conn.commit()
+        self._logger.info('Initialized tables paper_trade is completed.')
 
     def _store_assets_to_db(self) -> None:
         assets = self._client_pt.get_assets()
