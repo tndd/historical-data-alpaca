@@ -51,11 +51,11 @@ class ClientDB:
         # split lines every 500,000 because of restriction memory limit.
         chunk = 500000
         lines_len = len(lines)
-        self._logger.info(f"insert num: {lines_len}")
+        self._logger.debug(f"insert num: {lines_len}")
         lines_parts = [lines[i:i + chunk] for i in range(0, lines_len, chunk)]
         for i, l_part in enumerate(lines_parts):
             self.cur.executemany(query, l_part)
-            self._logger.info(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
+            self._logger.debug(f"executed query. progress: {i + 1}/{(lines_len // chunk) + 1}")
         self.conn.commit()
 
 

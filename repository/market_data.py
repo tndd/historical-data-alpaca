@@ -44,6 +44,7 @@ class RepositoryMarketData:
         q_bars_min = self._client_db.load_query_by_name(QueryType.CREATE, self._tbl_name_bars_min)
         self._client_db.cur.execute(q_bars_min)
         self._client_db.conn.commit()
+        self._logger.info('Initialized tables market_data is completed.')
 
     def _count_symbol_table_bars_1min(self, symbol: str) -> int:
         query = self._client_db.load_query_by_name(QueryType.COUNT, 'bars_1min_symbol')
