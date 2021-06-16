@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 from logging import Logger
 from pathlib import Path
-from exceptions import NotExistSqlFile
+from exception import NotExistSqlFile
 from data_types import QueryType
 from logger_alpaca.logger_alpaca import get_logger
 

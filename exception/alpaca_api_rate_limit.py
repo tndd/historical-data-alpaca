@@ -1,0 +1,2 @@
+class AlpacaApiRateLimit(Exception):
+    pass

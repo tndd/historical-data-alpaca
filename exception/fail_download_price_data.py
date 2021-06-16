@@ -1,0 +1,2 @@
+class FailDownloadPriceData(Exception):
+    pass

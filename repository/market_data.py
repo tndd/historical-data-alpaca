@@ -12,7 +12,7 @@ from repository.client import ClientMarketData, ClientDB
 from repository import RepositoryPaperTrade
 from data_types import TimeFrame, PriceDataCategory, QueryType
 from logger_alpaca.logger_alpaca import get_logger
-from exceptions import FailDownloadPriceData
+from exception import FailDownloadPriceData
 
 
 @dataclass

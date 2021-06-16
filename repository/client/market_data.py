@@ -3,10 +3,9 @@ import requests
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
 from repository.client import ClientAlpaca, ClientDB
 from data_types import TimeFrame, PriceDataCategory
-from exceptions import AlpacaApiRateLimit
+from exception import AlpacaApiRateLimit
 
 
 @dataclass

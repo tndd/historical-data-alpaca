@@ -1,0 +1,2 @@
+class NotExistSqlFile(Exception):
+    pass
