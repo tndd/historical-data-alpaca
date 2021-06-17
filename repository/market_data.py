@@ -44,7 +44,7 @@ class RepositoryMarketData:
         q_bars_min = self._client_db.load_query_by_name(QueryType.CREATE, self._tbl_name_bars_min)
         self._client_db.cur.execute(q_bars_min)
         self._client_db.conn.commit()
-        self._logger.info('Initialized tables market_data is completed.')
+        self._logger.debug('Initialized tables market_data is completed.')
 
     def _count_symbol_table_bars_1min(self, symbol: str) -> int:
         query = self._client_db.load_query_by_name(QueryType.COUNT, 'bars_1min_symbol')
@@ -196,7 +196,7 @@ class RepositoryMarketData:
     def update_bars_in_db(self, symbol: str) -> None:
         dl_start_date = self._get_should_start_dl_date(symbol)
         if dl_start_date is None:
-            self._logger.info((
+            self._logger.debug((
                 f'Bars "{self._time_frame.value}" "{symbol}" is latest in db. '
                 f'Update bars data will be skipped.'
             ))

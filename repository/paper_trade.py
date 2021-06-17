@@ -16,10 +16,10 @@ class RepositoryPaperTrade:
     _tbl_name_dl_progress: str = 'market_data_dl_progress'
 
     def __post_init__(self) -> None:
-        self.create_tables()
+        self._create_tables()
         self._init_market_data_dl_progress()
 
-    def create_tables(self) -> None:
+    def _create_tables(self) -> None:
         q_create_assets = self._client_db.load_query_by_name(QueryType.CREATE, self._tbl_name_assets)
         q_create_market_data_dl_progress = self._client_db.load_query_by_name(
             QueryType.CREATE,
@@ -28,7 +28,7 @@ class RepositoryPaperTrade:
         self._client_db.cur.execute(q_create_assets)
         self._client_db.cur.execute(q_create_market_data_dl_progress)
         self._client_db.conn.commit()
-        self._logger.info('Initialized tables paper_trade is completed.')
+        self._logger.debug('Initialized tables paper_trade is completed.')
 
     def _store_assets_to_db(self) -> None:
         assets = self._client_pt.get_assets()
