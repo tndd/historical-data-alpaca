@@ -32,18 +32,48 @@ def make_initial_pattern(
     return pattern
 
 
-def make_pattern_df(
+def make_df_price_movement(
         df_bars: pd.DataFrame,
         ptn_num: int = 4,
         ptn_range: int = 100000,
-        ptn_start_point: Optional[int] = None
+        start_point: Optional[int] = None
 ) -> pd.DataFrame:
-    if ptn_start_point is None:
-        ptn_start_point = ptn_range
-    elif ptn_start_point < ptn_range:
+    if start_point is None:
+        start_point = ptn_range
+    elif start_point < ptn_range:
         logger.warning('Start point is too early. start point was next to the end of ptn_range')
-        ptn_start_point = ptn_range
-    return None
+        start_point = ptn_range
+    pattern = make_initial_pattern(df_bars[:start_point], ptn_num)
+    # make dataframe price movement
+    prev_price = df_bars.iloc[ptn_num]['close']
+    price_movement_values = []
+    for index, row in df_bars[ptn_num + 1:].iterrows():
+        bp_close = ((row['close'] - prev_price) / prev_price) * 10000
+        bp_high = ((row['high'] - prev_price) / prev_price) * 10000
+        bp_low = ((row['low'] - prev_price) / prev_price) * 10000
+        price_movement_values.append([row['time'], pattern, bp_close, bp_high, bp_low])
+        # update pattern
+        if bp_close > 0:
+            pattern += 'u'
+        elif bp_close < 0:
+            pattern += 'd'
+        else:
+            pattern += 'e'
+        # next price
+        pattern = pattern[1:]
+        prev_price = row['close']
+
+    df_price_movement = pd.DataFrame(
+        price_movement_values,
+        columns=[
+            'time',
+            'pattern',
+            'bp_close',
+            'bp_high',
+            'bp_low'
+        ]
+    )
+    return df_price_movement
 
 
 def main():
@@ -51,8 +81,9 @@ def main():
         _end_time='2021-06-15'
     )
     df_bars = rp.load_bars_df('GLD')
-    print(df_bars[:5])
-    print(make_initial_pattern(df_bars))
+    df_price_movement = make_df_price_movement(df_bars)
+    print(df_bars)
+    print(df_price_movement)
 
 
 if __name__ == '__main__':
