@@ -76,14 +76,33 @@ def make_df_price_movement(
     return df_price_movement
 
 
+def make_df_pattern(df_price_movement):
+    # categorized movement by pattern
+    sr_pattern_up = df_price_movement.groupby('pattern')['bp_close'].apply(
+        lambda d: ((d > 0) == True).sum()
+    ).to_frame('up')
+    sr_pattern_equal = df_price_movement.groupby('pattern')['bp_close'].apply(
+        lambda d: ((d == 0) == True).sum()
+    ).to_frame('equal')
+    sr_pattern_down = df_price_movement.groupby('pattern')['bp_close'].apply(
+        lambda d: ((d < 0) == True).sum()
+    ).to_frame('down')
+    df_price_movement_mean = df_price_movement.groupby('pattern').mean()
+    # concat frames for pattern_frame
+    return df_price_movement_mean.join([sr_pattern_up, sr_pattern_equal, sr_pattern_down])
+
+
 def main():
     rp = RepositoryMarketData(
         _end_time='2021-06-15'
     )
     df_bars = rp.load_bars_df('GLD')
     df_price_movement = make_df_price_movement(df_bars)
+    df_pattern = make_df_pattern(df_price_movement)
     print(df_bars)
     print(df_price_movement)
+    print(df_pattern)
+    df_pattern.to_csv('GLD.csv')
 
 
 if __name__ == '__main__':
