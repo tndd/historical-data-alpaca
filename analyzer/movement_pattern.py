@@ -14,6 +14,24 @@ def make_patterns(ptn_num: int):
     return patterns
 
 
+def make_initial_pattern(
+        df_bars: pd.DataFrame,
+        ptn_num: int = 4
+) -> str:
+    pattern = ''
+    price_prev = df_bars.iloc[0]['close']
+    for i in range(1, ptn_num + 1):
+        price_now = df_bars.iloc[i]['close']
+        if price_prev < price_now:
+            pattern += 'u'
+        elif price_prev > price_now:
+            pattern += 'd'
+        else:
+            pattern += 'e'
+        price_prev = price_now
+    return pattern
+
+
 def make_pattern_df(
         df_bars: pd.DataFrame,
         ptn_num: int = 4,
@@ -28,6 +46,14 @@ def make_pattern_df(
     return None
 
 
+def main():
+    rp = RepositoryMarketData(
+        _end_time='2021-06-15'
+    )
+    df_bars = rp.load_bars_df('GLD')
+    print(df_bars[:5])
+    print(make_initial_pattern(df_bars))
+
+
 if __name__ == '__main__':
-    l = make_patterns(3)
-    print(l)
+    main()
